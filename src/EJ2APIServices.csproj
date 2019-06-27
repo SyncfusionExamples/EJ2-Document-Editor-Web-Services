@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OData" Version="7.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.1.0" />
+    <PackageReference Include="Npgsql" Version="4.0.2" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.1.1.1" />
+    <PackageReference Include="Syncfusion.Compression.Net.Core" Version="*" />
+    <PackageReference Include="Syncfusion.OfficeChart.Net.Core" Version="*" />
+    <PackageReference Include="Syncfusion.EJ2.WordEditor.AspNet.Core" Version="*" />
+	<PackageReference Include="Syncfusion.EJ2.SpellChecker.AspNet.Core" Version="*" />
+	<PackageReference Include="System.Drawing.Common" Version="4.*" />	
+	<PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.9.2" />
+  <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.*" />
+  </ItemGroup>
+
+</Project>
