@@ -93,7 +93,7 @@ namespace SyncfusionDocument.Controllers
         {
             if (param.content != null && param.content != "")
             {
-                WordDocument document = WordDocument.loadString(param.content, GetFormatType(param.type.ToLower()));
+                WordDocument document = WordDocument.LoadString(param.content, GetFormatType(param.type.ToLower()));
                 string json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
                 document.Dispose();
                 return json;
