@@ -17,13 +17,14 @@ using Microsoft.OData.UriParser;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using EJ2APIServices.Models;
 using EJ2APIServices.Controllers;
-
+using Syncfusion.EJ2.SpellChecker;
 
 namespace EJ2APIServices
 {
     public class Startup
     {
         private string _contentRootPath = "";
+        internal static List<SpellCheckDictionary> spellDictCollection;
         public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
@@ -35,6 +36,17 @@ namespace EJ2APIServices
             Configuration = builder.Build();
             _contentRootPath = env.ContentRootPath;
             ServerPath.MapPath = _contentRootPath;
+            string dictionaryPath = env.ContentRootPath + "\\App_Data\\en_US.dic";
+            string affixPath = env.ContentRootPath + "\\App_Data\\en_US.aff";
+            string customDict = env.ContentRootPath + "\\App_Data\\customDict.dic";
+            List<DictionaryData> items = new List<DictionaryData>() {
+               new DictionaryData(1046,dictionaryPath,affixPath,customDict),
+            };
+            spellDictCollection = new List<SpellCheckDictionary>();
+            foreach (var item in items)
+            {
+                spellDictCollection.Add(new SpellCheckDictionary(new DictionaryData(1046,dictionaryPath,affixPath,customDict)));
+            }
         }
 
         public IConfiguration Configuration { get; }
@@ -43,11 +55,9 @@ namespace EJ2APIServices
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddOData();
-            services.AddMvc()
-.AddJsonOptions(x =>
-{
-    x.SerializerSettings.ContractResolver = null;
-});
+            services.AddMvc().AddJsonOptions(x => {
+                x.SerializerSettings.ContractResolver = null;
+            });
 
             services.AddCors(options =>
             {
