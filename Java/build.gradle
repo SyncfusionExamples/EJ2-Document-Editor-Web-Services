@@ -10,11 +10,15 @@ sourceCompatibility = '1.8'
 
 repositories {
 	mavenCentral()
+	maven  {
+		//Syncfusion maven repository to download the artifacts.
+		url "https://jars.syncfusion.com/repository/maven-public/"
+	}
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'	
-	compile files('libs/syncfusion-ej2-wordprocessor-18.1.0.1.jar')
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'com.syncfusion:syncfusion-ej2-wordprocessor:19.1.0.54'
 	compile 'com.google.code.gson:gson:2.8.6'
 	testImplementation 'org.apache.httpcomponents:httpclient'
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
