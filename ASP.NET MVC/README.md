@@ -21,9 +21,28 @@ Document editor performs spell check by processing hunspell dictionary files, So
 
 ### Steps to configure spell checker
 
-* In the application App_Data folder include the dictionary and .aff dictionary files as below,
+* In the application App_Data folder, include the dictionary, .aff dictionary files and JSON file. 
 
 ![](appData.PNG)
+
+JSON file should contains the values in the following format.
+
+```json
+[
+  {
+    "LanguadeID": 1036, 
+    "DictionaryPath": "fr_FR.dic",
+    "AffixPath": "fr_FR.aff", 
+    "PersonalDictPath": "customDict.dic"
+  },
+  {
+    "LanguadeID": 1033,
+    "DictionaryPath": "en_US.dic",
+    "AffixPath": "en_US.aff",
+    "PersonalDictPath": "customDict.dic"
+  }
+]
+```
 
 * For handling personal dictionary, place empty .dic file (ex. customDict.dic file) in the App_Data folder.
 

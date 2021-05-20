@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("EJ2DocumentEditorAPIServices")]
+[assembly: AssemblyTitle("EJ2DocumentEditorWebServices")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("EJ2DocumentEditorAPIServices")]
-[assembly: AssemblyCopyright("Copyright ©  2019")]
+[assembly: AssemblyProduct("EJ2DocumentEditorWebServices")]
+[assembly: AssemblyCopyright("Copyright ©  2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("db3cb4ce-5b2f-4769-9f13-5bf3cde09e17")]
+[assembly: Guid("cd776188-61c5-4c8b-aeb6-6552acfa778a")]
 
 // Version information for an assembly consists of the following four values:
 //
