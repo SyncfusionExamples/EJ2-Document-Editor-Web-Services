@@ -7,20 +7,22 @@ using System.Web;
 using System.Web.Http;
 using System.Web.Http.Cors;
 using EJ2WordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument;
-using EJ2DocumentEditorAPIServices;
 
-namespace EJ2DocumentEditorAPIServices.Controllers
+namespace EJ2DocumentEditorWebServices.Controllers
 {
+
     [EnableCors("*", "*", "*")]
     [RoutePrefix("api/documenteditor")]
     public class DocumentEditorController : ApiController
     {
-        List<SpellCheckDictionary> spellDictionary;
+        List<DictionaryData> spellDictionary;
+        string personalDictPath;
         public DocumentEditorController()
         {
             spellDictionary = WebApiApplication.spellDictCollection;
+            personalDictPath = WebApiApplication.personalDictPath;
         }
-        
+
         [HttpPost]
         [EnableCors("*", "*", "*")]
         [Route("Import")]
@@ -45,7 +47,7 @@ namespace EJ2DocumentEditorAPIServices.Controllers
         [HttpPost]
         [EnableCors("*", "*", "*")]
         [Route("SystemClipboard")]
-        public HttpResponseMessage SystemClipboard([FromBody]CustomParameter param)
+        public HttpResponseMessage SystemClipboard([FromBody] CustomParameter param)
         {
             if (param.content != null && param.content != "")
             {
@@ -68,7 +70,7 @@ namespace EJ2DocumentEditorAPIServices.Controllers
         [HttpPost]
         [EnableCors("*", "*", "*")]
         [Route("RestrictEditing")]
-        public string[] RestrictEditing([FromBody]CustomRestrictParameter param)
+        public string[] RestrictEditing([FromBody] CustomRestrictParameter param)
         {
             if (param.passwordBase64 == "" && param.passwordBase64 == null)
                 return null;
@@ -82,7 +84,7 @@ namespace EJ2DocumentEditorAPIServices.Controllers
         {
             try
             {
-                SpellChecker spellCheck = new SpellChecker(spellDictionary);
+                SpellChecker spellCheck = new SpellChecker(spellDictionary, personalDictPath);
                 spellCheck.GetSuggestions(spellChecker.LanguageID, spellChecker.TexttoCheck, spellChecker.CheckSpelling, spellChecker.CheckSuggestion, spellChecker.AddWord);
                 string json = Newtonsoft.Json.JsonConvert.SerializeObject(spellCheck);
                 return new HttpResponseMessage() { Content = new StringContent(json) };
@@ -100,7 +102,7 @@ namespace EJ2DocumentEditorAPIServices.Controllers
         {
             try
             {
-                SpellChecker spellCheck = new SpellChecker(spellDictionary);
+                SpellChecker spellCheck = new SpellChecker(spellDictionary, personalDictPath);
                 spellCheck.CheckSpelling(spellChecker.LanguageID, spellChecker.TexttoCheck);
                 string json = Newtonsoft.Json.JsonConvert.SerializeObject(spellCheck);
                 return new HttpResponseMessage() { Content = new StringContent(json) };
@@ -168,4 +170,5 @@ namespace EJ2DocumentEditorAPIServices.Controllers
         public string saltBase64 { get; set; }
         public int spinCount { get; set; }
     }
+
 }
