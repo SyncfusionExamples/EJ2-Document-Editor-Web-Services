@@ -46,7 +46,7 @@ namespace EJ2APIServices
             string jsonFileName = Configuration["SPELLCHECK_JSON_FILENAME"];
             //check the spell check dictionary path environment variable value and assign default data folder
             //if it is null.
-            path = string.IsNullOrEmpty(path) ? Path.Combine(env.ContentRootPath, "Data") : Path.Combine(env.ContentRootPath, path);
+            path = string.IsNullOrEmpty(path) ? Path.Combine(env.ContentRootPath, "App_Data") : Path.Combine(env.ContentRootPath, path);
             //Set the default spellcheck.json file if the json filename is empty.
             jsonFileName = string.IsNullOrEmpty(jsonFileName) ? Path.Combine(path, "spellcheck.json") : Path.Combine(path, jsonFileName);
             if (System.IO.File.Exists(jsonFileName))
