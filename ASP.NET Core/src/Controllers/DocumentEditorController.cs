@@ -257,6 +257,8 @@ namespace SyncfusionDocument.Controllers
                     return WFormatType.Doc;
                 case ".rtf":
                     return WFormatType.Rtf;
+                case ".html":
+                    return WFormatType.Html;
                 case ".txt":
                     return WFormatType.Txt;
                 case ".xml":
@@ -271,6 +273,55 @@ namespace SyncfusionDocument.Controllers
         [AcceptVerbs("Post")]
         [HttpPost]
         [EnableCors("AllowAllOrigins")]
+        [Route("Save")]
+        public void Save([FromBody] SaveParameter data)
+        {
+            string name = data.FileName;
+            string format = RetrieveFileType(name);
+            if (string.IsNullOrEmpty(name))
+            {
+                name = "Document1.doc";
+            }
+            WDocument document = WordDocument.Save(data.Content);
+            FileStream fileStream = new FileStream(name, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            document.Save(fileStream, GetWFormatType(format));
+            document.Close();
+            fileStream.Close();
+        }
+
+        [AcceptVerbs("Post")]
+        [HttpPost]
+        [EnableCors("AllowAllOrigins")]
+        [Route("ExportSFDT")]
+        public FileStreamResult ExportSFDT([FromBody] SaveParameter data)
+        {
+            string name = data.FileName;
+            string format = RetrieveFileType(name);
+            if (string.IsNullOrEmpty(name))
+            {
+                name = "Document1.doc";
+            }
+            WDocument document = WordDocument.Save(data.Content);
+            return SaveDocument(document, format, name);
+        }
+
+        private string RetrieveFileType(string name)
+        {
+            int index = name.LastIndexOf('.');
+            string format = index > -1 && index < name.Length - 1 ?
+                name.Substring(index) : ".doc";
+            return format;
+        }
+
+        public class SaveParameter
+        {
+            public string Content { get; set; }
+            public string FileName { get; set; }
+        }
+
+        [AcceptVerbs("Post")]
+        [HttpPost]
+        [EnableCors("AllowAllOrigins")]
         [Route("Export")]
         public FileStreamResult Export(IFormCollection data)
         {
@@ -278,16 +329,19 @@ namespace SyncfusionDocument.Controllers
                 return null;
             string fileName = this.GetValue(data, "filename");
             string name = fileName;
-            int index = name.LastIndexOf('.');
-            string format = index > -1 && index < name.Length - 1 ?
-                name.Substring(index) : ".doc";
+            string format = RetrieveFileType(name);
             if (string.IsNullOrEmpty(name))
             {
                 name = "Document1";
             }
+            WDocument document = this.GetDocument(data);
+            return SaveDocument(document, format, fileName);
+        }
+
+        private FileStreamResult SaveDocument(WDocument document, string format, string fileName)
+        {
             Stream stream = new MemoryStream();
             string contentType = "";
-            WDocument document = this.GetDocument(data);
             if (format == ".pdf")
             {
                 contentType = "application/pdf";
@@ -302,6 +356,9 @@ namespace SyncfusionDocument.Controllers
                         break;
                     case WFormatType.WordML:
                         contentType = "application/xml";
+                        break;
+                    case WFormatType.Html:
+                        contentType = "application/html";
                         break;
                     case WFormatType.Dotx:
                         contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.template";
@@ -322,6 +379,7 @@ namespace SyncfusionDocument.Controllers
                 FileDownloadName = fileName
             };
         }
+
         private string GetValue(IFormCollection data, string key)
         {
             if (data.ContainsKey(key))
