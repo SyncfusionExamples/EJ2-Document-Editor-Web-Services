@@ -11,43 +11,43 @@ gradlew bootRun
 * SystemClipboard
 * RestrictEditing
 
-## Import
+### Import
 In order to import word documents into document editor you can make use of this service call. Also you can convert word documents (.dotx,.docx,.docm,.dot,.doc), rich text format documents (.rtf), and text documents (.txt) into SFDT format by using this Web API service implementation.
 
-## SystemClipboard
+### SystemClipboard
 You can make use of this service in order to paste system clipboard data by preserving the formatting.
 
-## RestrictEditing
+### RestrictEditing
 Document Editor provides support for restrict editing. You can make use of this Web API service to encrypt/decrypt protected content. 
 
-## Regarding CORS issue on API request:
+## Enabling Cross origin requests for Web APIs
 Cross-Origin Resource Sharing (CORS) is a protocol that enables scripts running on a browser client to interact with resources from a different origin. In the client side we can make only API calls to the URLs that live in the same origin where the script is running or else it will be blocked as per [Same-Origin policy](https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy)
 
 When the server configured correctly to allow cross-origin resource sharing some special headers will be included in the response. Based on that browser will determine to proceed with the request or should fail.
 
-### How to enable CORS in Java Sprint boot
-You can enable CORS from either in controller , Method level or globally . Kindly follow below steps to achieve it.
+### How to enable CORS in Java Spring boot
+You can enable CORS per action, per controller, or globally for all Web API controllers in your application. Kindly follow below steps to achieve it.
 
-###  Enabling gloabl CORS:
-We can enable CORS for the whole application be declaring `WebMvcConfigurer` bean
-![Global CORS](Global-CORS.png)
+### Enabling global CORS
+ Enable CORS for the whole application be declaring `WebMvcConfigurer` bean
+![Global CORS](Global-CORS.PNG)
 
 
-### Enabling CORS for specific WebAPI methods / Controller class (All Domain):
-You can configure WebAPI methods / Controller class to access from all the domains as below,
-
-**Controller Level** 
-![CORS enable for all domains](Controller_allOrigin.png)
-**Method Level** 
-![CORS enable for all domains](MethodApi_allOrigin.png)
-
-### Enabling CORS for specific WebAPI methods / Controller class (Specific Domain):
-You can configure WebAPI methods / Controller class to access from specific domains as below,
+### Enabling CORS for specific WebAPI methods / Controller class (All Domain)
+Configure WebAPI methods / Controller class to access from all the domains as below,
 
 **Controller Level** 
-![CORS enable for specifi domains](Controller_specificOrigin.png)
+![CORS enable for all domains](Controller_allOrigin.PNG)
 **Method Level** 
-![CORS enable for specific domains](MethodApi_specificOrigin.png)
+![CORS enable for all domains](MethodApi_allOrigin.PNG)
+
+### Enabling CORS for specific WebAPI methods / Controller class (Specific Domain)
+Configure WebAPI methods / Controller class to access from specific domains as below,
+
+**Controller Level** 
+![CORS enable for specific domains](Controller_specificOrigin.PNG)
+**Method Level** 
+![CORS enable for specific domains](MethodApi_specificOrigin.PNG)
 
 
 **NOTE**
