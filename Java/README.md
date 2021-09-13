@@ -37,16 +37,27 @@ You can enable CORS per action, per controller, or globally for all Web API cont
 Configure WebAPI methods / Controller class to access from all the domains as below,
 
 **Controller Level** 
+
+
 ![CORS enable for all domains](Controller_allOrigin.PNG)
+
 **Method Level** 
+
+
 ![CORS enable for all domains](MethodApi_allOrigin.PNG)
+
 
 ### Enabling CORS for specific WebAPI methods / Controller class (Specific Domain)
 Configure WebAPI methods / Controller class to access from specific domains as below,
 
 **Controller Level** 
+
+
 ![CORS enable for specific domains](Controller_specificOrigin.PNG)
+
 **Method Level** 
+
+
 ![CORS enable for specific domains](MethodApi_specificOrigin.PNG)
 
 
