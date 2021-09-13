@@ -21,7 +21,7 @@ You can make use of this service in order to paste system clipboard data by pres
 Document Editor provides support for restrict editing. You can make use of this Web API service to encrypt/decrypt protected content. 
 
 ## Regarding CORS issue on API request:
-Cross-Origin Resource Sharing (CORS) is a protocol that enables scripts running on a browser client to interact with resources from a different origin. In the client side we can make only API calls to the URLs that live in the same origin where the script is running or else it will be blocked as per [Same-Origin policy][https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy]
+Cross-Origin Resource Sharing (CORS) is a protocol that enables scripts running on a browser client to interact with resources from a different origin. In the client side we can make only API calls to the URLs that live in the same origin where the script is running or else it will be blocked as per [Same-Origin policy](https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy)
 
 When the server configured correctly to allow cross-origin resource sharing some special headers will be included in the response. Based on that browser will determine to proceed with the request or should fail.
 
