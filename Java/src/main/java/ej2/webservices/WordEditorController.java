@@ -7,7 +7,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +26,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.syncfusion.ej2.spellchecker.DictionaryData;
 import com.syncfusion.ej2.spellchecker.SpellChecker;
+import com.syncfusion.docio.WordDocument;
 import com.syncfusion.ej2.wordprocessor.FormatType;
 
 @RestController
@@ -115,6 +122,115 @@ public class WordEditorController {
 			}
 		}
 		return "";
+	}
+	
+	@CrossOrigin(origins = "*", allowedHeaders = "*")
+	@PostMapping("/api/wordeditor/Save")
+	public void save(@RequestBody SaveParameter data) throws Exception {
+		try {
+			String name = data.getFileName();
+			String format = retrieveFileType(name);
+			if (name == null || name.isEmpty()) {
+				name = "Document1.docx";
+			}
+			WordDocument document = WordProcessorHelper.save(data.getContent());
+			FileOutputStream fileStream = new FileOutputStream(name);
+			document.save(fileStream, getWFormatType(format));
+			fileStream.close();
+            document.close();
+		} catch (Exception ex) {
+			throw new Exception(ex.getMessage());
+		}
+	}
+	
+	@CrossOrigin(origins = "*", allowedHeaders = "*")
+	@PostMapping("/api/wordeditor/ExportSFDT")
+	public ResponseEntity<Resource> exportSFDT(@RequestBody SaveParameter data) throws Exception {
+		try {
+			String name = data.getFileName();
+			String format = retrieveFileType(name);
+			if (name == null || name.isEmpty()) {
+				name = "Document1.docx";
+			}
+			WordDocument document = WordProcessorHelper.save(data.getContent());
+			return saveDocument(document, format);
+		} catch (Exception ex) {
+			throw new Exception(ex.getMessage());
+		}
+	}
+	
+	@CrossOrigin(origins = "*", allowedHeaders = "*")
+	@PostMapping("/api/wordeditor/Export")
+	public ResponseEntity<Resource> export(@RequestParam("data") MultipartFile data, String fileName) throws Exception {
+		try {
+			String name = fileName;
+			String format = retrieveFileType(name);
+			if (name == null || name.isEmpty()) {
+				name = "Document1";
+			}
+			WordDocument document = new WordDocument(data.getInputStream(), com.syncfusion.docio.FormatType.Docx);
+			return saveDocument(document, format);
+		} catch (Exception ex) {
+			throw new Exception(ex.getMessage());
+		}
+	}
+	
+	private ResponseEntity<Resource> saveDocument(WordDocument document, String format) throws Exception {
+		String contentType = "";
+		ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+		com.syncfusion.docio.FormatType type = getWFormatType(format);
+		switch (type.toString()) {
+		case "Rtf":
+			contentType = "application/rtf";
+			break;
+		case "WordML":
+			contentType = "application/xml";
+			break;
+		case "Dotx":
+			contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.template";
+			break;
+		case "Html":
+			contentType = "application/html";
+			break;
+		}
+		document.save(outStream, type);
+		ByteArrayResource resource = new ByteArrayResource(outStream.toByteArray());
+		outStream.close();
+		document.close();
+		
+		return ResponseEntity.ok().contentLength(resource.contentLength())
+				.contentType(MediaType.parseMediaType(contentType)).body(resource);
+	}
+
+	private String retrieveFileType(String name) {
+		int index = name.lastIndexOf('.');
+		String format = index > -1 && index < name.length() - 1 ? name.substring(index) : ".docx";
+		return format;
+	}
+
+	static com.syncfusion.docio.FormatType getWFormatType(String format) throws Exception {
+		if (format == null || format.trim().isEmpty())
+			throw new Exception("EJ2 WordProcessor does not support this file format.");
+		switch (format.toLowerCase()) {
+		case ".dotx":
+			return com.syncfusion.docio.FormatType.Dotx;
+		case ".docm":
+			return com.syncfusion.docio.FormatType.Docm;
+		case ".dotm":
+			return com.syncfusion.docio.FormatType.Dotm;
+		case ".docx":
+			return com.syncfusion.docio.FormatType.Docx;
+		case ".rtf":
+			return com.syncfusion.docio.FormatType.Rtf;
+		case ".html":
+			return com.syncfusion.docio.FormatType.Html;
+		case ".txt":
+			return com.syncfusion.docio.FormatType.Txt;
+		case ".xml":
+			return com.syncfusion.docio.FormatType.WordML;
+		default:
+			throw new Exception("EJ2 WordProcessor does not support this file format.");
+		}
 	}
 	
 	static FormatType GetFormatType(String format)
