@@ -67,7 +67,7 @@ public class WordEditorController {
 	
 	@CrossOrigin(origins = "*", allowedHeaders = "*")
 	@PostMapping("/api/wordeditor/Import")
-	public String uploadFile(@RequestParam("files") MultipartFile file) throws Exception {
+	public String import(@RequestParam("files") MultipartFile file) throws Exception {
 		try {
 			return WordProcessorHelper.load(file.getInputStream(), FormatType.Docx);
 		} catch (Exception e) {
