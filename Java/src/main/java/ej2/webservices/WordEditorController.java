@@ -34,11 +34,9 @@ public class WordEditorController {
 
         List<DictionaryData> spellDictionary;
         String personalDictPath;
-	int count;
 	public WordEditorController() throws Exception {
 		 
 	String jsonFilePath = "src/main/resources/spellcheck.json";
-	count = 0;
 	String jsonContent = new String(Files.readAllBytes(Paths.get(jsonFilePath)), StandardCharsets.UTF_8);
 	JsonArray spellDictionaryItems = new Gson().fromJson(jsonContent, JsonArray.class);
 	personalDictPath = "src/main/resources/customDict.dic";
@@ -67,7 +65,7 @@ public class WordEditorController {
 	
 	@CrossOrigin(origins = "*", allowedHeaders = "*")
 	@PostMapping("/api/wordeditor/Import")
-	public String import(@RequestParam("files") MultipartFile file) throws Exception {
+	public String importFile(@RequestParam("files") MultipartFile file) throws Exception {
 		try {
 			return WordProcessorHelper.load(file.getInputStream(), FormatType.Docx);
 		} catch (Exception e) {
