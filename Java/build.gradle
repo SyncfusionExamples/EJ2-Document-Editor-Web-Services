@@ -20,6 +20,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'com.syncfusion:syncfusion-ej2-wordprocessor:+'
 	implementation 'com.syncfusion:syncfusion-ej2-spellchecker:+'
+	implementation 'com.syncfusion:syncfusion-docio:+'
+	implementation 'com.syncfusion:syncfusion-javahelper:+'
 	compile 'com.google.code.gson:gson:2.8.6'
 	testImplementation 'org.apache.httpcomponents:httpclient'
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
