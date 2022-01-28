@@ -27,9 +27,8 @@ namespace EJ2APIServices
     public class Startup
     {
         private string _contentRootPath = "";
-        internal static List<DictionaryData> spellDictCollection;
+        internal static SpellChecker spellChecker;
         internal static string path;
-        internal static string personalDictPath;
 
         public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
@@ -53,13 +52,15 @@ namespace EJ2APIServices
             {
                 string jsonImport = System.IO.File.ReadAllText(jsonFileName);
                 List<DictionaryData> spellChecks = JsonConvert.DeserializeObject<List<DictionaryData>>(jsonImport);
-                spellDictCollection = new List<DictionaryData>();
+                List<DictionaryData> spellDictCollection = new List<DictionaryData>();
+                string personalDictPath = null;
                 //construct the dictionary file path using customer provided path and dictionary name
                 foreach (var spellCheck in spellChecks)
                 {
                     spellDictCollection.Add(new DictionaryData(spellCheck.LanguadeID, Path.Combine(path, spellCheck.DictionaryPath), Path.Combine(path, spellCheck.AffixPath)));
                     personalDictPath = Path.Combine(path, spellCheck.PersonalDictPath);
                 }
+                spellChecker = new SpellChecker(spellDictCollection, personalDictPath);
             }
         }
 

@@ -21,17 +21,14 @@ namespace SyncfusionDocument.Controllers
     public class DocumentEditorController : Controller
     {
         private readonly IHostingEnvironment _hostingEnvironment;
-        List<DictionaryData> spellDictionary;
-        string personalDictPath;
+        SpellChecker spellCheck;
         string path;
 
         public DocumentEditorController(IHostingEnvironment hostingEnvironment)
         {
             _hostingEnvironment = hostingEnvironment;
-            spellDictionary = Startup.spellDictCollection;
+            spellCheck = Startup.spellChecker;
             path = Startup.path;
-            personalDictPath = Startup.personalDictPath;
-
         }
 
         [AcceptVerbs("Post")]
@@ -64,7 +61,6 @@ namespace SyncfusionDocument.Controllers
         {
             try
             {
-                SpellChecker spellCheck = new SpellChecker(spellDictionary, personalDictPath);
                 spellCheck.GetSuggestions(spellChecker.LanguageID, spellChecker.TexttoCheck, spellChecker.CheckSpelling, spellChecker.CheckSuggestion, spellChecker.AddWord);
                 return Newtonsoft.Json.JsonConvert.SerializeObject(spellCheck);
             }
@@ -82,7 +78,6 @@ namespace SyncfusionDocument.Controllers
         {
             try
             {
-                SpellChecker spellCheck = new SpellChecker(spellDictionary, personalDictPath);
                 spellCheck.CheckSpelling(spellChecker.LanguageID, spellChecker.TexttoCheck);
                 return Newtonsoft.Json.JsonConvert.SerializeObject(spellCheck);
             }
