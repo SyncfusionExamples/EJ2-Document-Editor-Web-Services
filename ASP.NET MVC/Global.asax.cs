@@ -13,9 +13,8 @@ namespace EJ2DocumentEditorWebServices
 {
     public class WebApiApplication : System.Web.HttpApplication
     {
-        internal static List<DictionaryData> spellDictCollection;
+        internal static SpellChecker spellChecker;
         internal static string path;
-        internal static string personalDictPath;
         protected void Application_Start()
         {
             GlobalConfiguration.Configure(WebApiConfig.Register);
@@ -28,13 +27,15 @@ namespace EJ2DocumentEditorWebServices
             {
                 string jsonImport = System.IO.File.ReadAllText(jsonFileName);
                 List<DictionaryData> spellChecks = JsonConvert.DeserializeObject<List<DictionaryData>>(jsonImport);
-                spellDictCollection = new List<DictionaryData>();
+                List<DictionaryData> spellDictCollection = new List<DictionaryData>();
+                string personalDictPath = null;
                 //construct the dictionary file path using customer provided path and dictionary name
                 foreach (var spellCheck in spellChecks)
                 {
                     spellDictCollection.Add(new DictionaryData(spellCheck.LanguadeID, Path.Combine(path, spellCheck.DictionaryPath), Path.Combine(path, spellCheck.AffixPath)));
                     personalDictPath = Path.Combine(path, spellCheck.PersonalDictPath);
                 }
+                spellChecker = new SpellChecker(spellDictCollection, personalDictPath);
             }
         }
     }
