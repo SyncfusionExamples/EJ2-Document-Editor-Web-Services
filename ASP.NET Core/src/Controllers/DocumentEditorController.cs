@@ -21,13 +21,11 @@ namespace SyncfusionDocument.Controllers
     public class DocumentEditorController : Controller
     {
         private readonly IHostingEnvironment _hostingEnvironment;
-        SpellChecker spellCheck;
         string path;
 
         public DocumentEditorController(IHostingEnvironment hostingEnvironment)
         {
             _hostingEnvironment = hostingEnvironment;
-            spellCheck = Startup.spellChecker;
             path = Startup.path;
         }
 
@@ -61,6 +59,7 @@ namespace SyncfusionDocument.Controllers
         {
             try
             {
+                SpellChecker spellCheck = new SpellChecker();
                 spellCheck.GetSuggestions(spellChecker.LanguageID, spellChecker.TexttoCheck, spellChecker.CheckSpelling, spellChecker.CheckSuggestion, spellChecker.AddWord);
                 return Newtonsoft.Json.JsonConvert.SerializeObject(spellCheck);
             }
@@ -78,6 +77,7 @@ namespace SyncfusionDocument.Controllers
         {
             try
             {
+                SpellChecker spellCheck = new SpellChecker();
                 spellCheck.CheckSpelling(spellChecker.LanguageID, spellChecker.TexttoCheck);
                 return Newtonsoft.Json.JsonConvert.SerializeObject(spellCheck);
             }

@@ -27,7 +27,6 @@ namespace EJ2APIServices
     public class Startup
     {
         private string _contentRootPath = "";
-        internal static SpellChecker spellChecker;
         internal static string path;
 
         public Startup(IConfiguration configuration, IHostingEnvironment env)
@@ -60,7 +59,7 @@ namespace EJ2APIServices
                     spellDictCollection.Add(new DictionaryData(spellCheck.LanguadeID, Path.Combine(path, spellCheck.DictionaryPath), Path.Combine(path, spellCheck.AffixPath)));
                     personalDictPath = Path.Combine(path, spellCheck.PersonalDictPath);
                 }
-                spellChecker = new SpellChecker(spellDictCollection, personalDictPath);
+                SpellChecker.InitializeDictionaries(spellDictCollection, personalDictPath, 3);
             }
         }
 

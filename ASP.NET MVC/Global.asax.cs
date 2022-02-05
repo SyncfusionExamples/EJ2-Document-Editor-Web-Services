@@ -13,8 +13,6 @@ namespace EJ2DocumentEditorWebServices
 {
     public class WebApiApplication : System.Web.HttpApplication
     {
-        internal static SpellChecker spellChecker;
-        internal static string path;
         protected void Application_Start()
         {
             GlobalConfiguration.Configure(WebApiConfig.Register);
@@ -35,7 +33,7 @@ namespace EJ2DocumentEditorWebServices
                     spellDictCollection.Add(new DictionaryData(spellCheck.LanguadeID, Path.Combine(path, spellCheck.DictionaryPath), Path.Combine(path, spellCheck.AffixPath)));
                     personalDictPath = Path.Combine(path, spellCheck.PersonalDictPath);
                 }
-                spellChecker = new SpellChecker(spellDictCollection, personalDictPath);
+                SpellChecker.InitializeDictionaries(spellDictCollection, personalDictPath, 3);
             }
         }
     }
