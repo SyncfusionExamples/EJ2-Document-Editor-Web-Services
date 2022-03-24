@@ -1,19 +1,24 @@
 # EJ2 Document editor Services
 
-We have implemented Minimal Web API approach. 
+In this repo, We have implemented [`Minimal Web API`](https://docs.microsoft.com/en-us/aspnet/core/tutorials/min-web-api?view=aspnetcore-6.0&tabs=visual-studio) approach for ASP.Net Core Services. 
 
 ## Prerequisites
 
 * .Net 6.0
 * Visual Studio 2022 or VS Code
 
+Please check below this [`link`](https://docs.microsoft.com/en-us/aspnet/core/tutorials/min-web-api?view=aspnetcore-6.0&tabs=visual-studio#prerequisites) to know more about prerequisites.
+
 
 ## Available Web API services in EJ2 Document Editor
+
 * Import
 * SpellCheck
 * SystemClipboard
 * RestrictEditing
 * Save
+* ExportSFDT
+* Export
 
 ## Import
 In order to import word documents into document editor you can make use of this service call. Also you can convert word documents (.dotx,.docx,.docm,.dot,.doc), rich text format documents (.rtf), and text documents (.txt) into SFDT format by using this Web API service implementation.
@@ -83,3 +88,22 @@ JSON file should contains the values in the following format.
 
 ## RestrictEditing
 Document Editor provides support for restrict editing. You can make use of this Web API service to encrypt/decrypt protected content. 
+
+## Save
+
+This Web API saves the document in the server machine. You can customize this API to save the document into databases or file servers.
+
+## ExportSfdt
+
+This Web API converts the SFDT string to required format and returns the document as FileStreamResult to client-side. Using this API, you can save the document in file format other than SFDT and DOCX and download the document in client browser.
+
+## Export
+
+This Web API converts the DOCX document to required format and returns the document as FileStreamResult to client-side. Using this API, you can save the document in file format other than SFDT and DOCX and download the document in client browser.
+
+## How to use it?
+
+* Download the services
+* Run the project using Visual studio or command prompt
+* Then you will get the following URL: "https://localhost:8000/api/documenteditor"
+* Then use it in your application.
