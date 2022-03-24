@@ -37,7 +37,7 @@ Document editor performs spell check by processing hunspell dictionary files, So
 
 * In the application App_Data folder, include the dictionary, .aff dictionary files and JSON file. 
 
-![](appData.PNG)
+![App_Data folder](appData.PNG)
 
 JSON file should contains the values in the following format.
 
@@ -61,7 +61,7 @@ JSON file should contains the values in the following format.
 * For handling personal dictionary, place empty .dic file (ex. customDict.dic file) in the App_Data folder.
 
 * Refer the added files in the spell checker service call as well where we will pass the file information
- ![](codeFile.png)
+ ![Spell checker service call](codeFile.png)
  
 ### How it works
 
@@ -71,7 +71,7 @@ JSON file should contains the values in the following format.
 
 * As mentioned document editor supports multi-language spell check. You can add as many languages (dictionaries) using **DictionaryData** class with unique ID for each language. Spell checking will be initiated only when languageID value passed in client side present in the **DictionaryData** collection. 
 
-![](multiLang.PNG)
+![Multi-language spell check](multiLang.PNG)
 
 ### TexttoCheck
 
