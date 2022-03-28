@@ -1,5 +1,8 @@
 ﻿namespace DocumentEditorCore
 {
+    /// <summary>
+    /// Specifies the mail merge data
+    /// </summary>
     public class CustomerDataModel
     {
         public static List<Customer> GetAllRecords()

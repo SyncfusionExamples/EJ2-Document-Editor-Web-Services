@@ -1,5 +1,8 @@
 ﻿namespace DocumentEditorCore
 {
+    /// <summary>
+    /// This Class contains the property for Mail merge
+    /// </summary>
     public class Customer
     {
         public string CustomerID { get; set; }

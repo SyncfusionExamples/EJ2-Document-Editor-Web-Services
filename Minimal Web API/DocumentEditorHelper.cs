@@ -17,6 +17,9 @@ using Newtonsoft.Json;
 
 namespace DocumentEditorCore
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class DocumentEditorHelper
     {
         internal List<Syncfusion.EJ2.SpellChecker.DictionaryData>? spellDictCollection;

@@ -1,5 +1,8 @@
 ﻿namespace DocumentEditorCore
 {
+    /// <summary>
+    /// This Class contains the property for Restrict editing
+    /// </summary>
     public class CustomRestrictParameter
     {
         public string? passwordBase64 { get; set; }

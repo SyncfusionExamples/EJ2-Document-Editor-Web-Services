@@ -1,5 +1,8 @@
 ﻿namespace DocumentEditorCore
 {
+    /// <summary>
+    /// Specifies the property for Spell check functionality
+    /// </summary>
     public class SpellCheckJsonData
     {
         public int LanguageID { get; set; }
