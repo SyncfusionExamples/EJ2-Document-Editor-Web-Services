@@ -1,7 +1,7 @@
 ﻿namespace DocumentEditorCore
 {
     /// <summary>
-    /// Contains the property for export the document
+    /// Contains the parameters required for exporting a document.
     /// </summary>
     public class ExportData
     {

@@ -34,7 +34,7 @@ app.UseCors("AllowAllOrigins");
 var documentEditorHelper = new DocumentEditorHelper();
 
 /// <summary>
-/// Load default document from URL
+/// Loads a default Word document.
 /// </summary>
 app.MapGet("/loadDefault", () =>
 {
@@ -42,7 +42,7 @@ app.MapGet("/loadDefault", () =>
     return documentEditorHelper.LoadDefault();
 });
 /// <summary>
-/// Convert HTML/RTF to SFDT format
+/// Converts the clipboard data (HTML/RTF) to SFDT format
 /// </summary>
 app.MapPost("/SystemClipboard", (CustomParameter param) =>
 {
@@ -58,7 +58,7 @@ app.MapPost("/Import", (HttpRequest request) =>
 
 });
 /// <summary>
-/// When protecting the document, for generating hash
+/// Generates the hash for protecting a Word document.
 /// </summary>
 app.MapPost("/RestrictEditing", (CustomRestrictParameter param) =>
 {
@@ -72,21 +72,21 @@ app.MapPost("/SpellCheck", (SpellCheckJsonData spellChecker) =>
     return documentEditorHelper.SpellCheck(spellChecker);
 });
 /// <summary>
-/// Perform spellcheck page by page when loading the documents
+/// Performs spell check validation page by page while loading the documents in Document editor control.
 /// </summary>
 app.MapPost("/SpellCheckByPage", (SpellCheckJsonData spellChecker) =>
 {
     return documentEditorHelper.SpellCheckByPage(spellChecker);
 });
 /// <summary>
-/// To merge the data from data source to a Word document
+/// Performs mail merge in a Word document
 /// </summary>
 app.MapPost("/MailMerge", (ExportData exportData) =>
 {
     return documentEditorHelper.MailMerge(exportData);
 });
 /// <summary>
-/// Save the document in server from SFDT
+/// Saves the document in server from SFDT
 /// </summary>
 app.MapPost("/Save", (SaveParameter data) =>
 {
@@ -114,7 +114,7 @@ app.MapPost("/Export", (HttpRequest request) =>
 
 });
 /// <summary>
-/// Load the document from URL
+/// Loads the specified template document that is already stored in the server.
 /// </summary>
 app.MapPost("/LoadDocument", (UploadDocument uploadDocument) =>
 {

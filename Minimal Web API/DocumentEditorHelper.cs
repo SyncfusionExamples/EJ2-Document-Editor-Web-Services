@@ -18,7 +18,7 @@ using Newtonsoft.Json;
 namespace DocumentEditorCore
 {
     /// <summary>
-    /// 
+    /// Contains the server-side helper functions for JavaScript Document editor control.
     /// </summary>
     public class DocumentEditorHelper
     {
@@ -47,7 +47,7 @@ namespace DocumentEditorCore
         }
 
         /// <summary>
-        /// To convert HTML/RTF to SFDT format
+        /// Converts the clipboard data (HTML/RTF) to SFDT format
         /// </summary>
         /// <param name="param">Input parameter Html or Rtf string</param>
         /// <returns>SFDT string</returns>
@@ -93,7 +93,7 @@ namespace DocumentEditorCore
             return json;
         }
         /// <summary>
-        /// When protecting the document, for generating hash
+        /// Generates the hash for protecting a Word document.
         /// </summary>
         /// <param name="param">Sends the input data for hashing algorithm</param>
         /// <returns>Hash information</returns>
@@ -105,7 +105,7 @@ namespace DocumentEditorCore
         }
 
         /// <summary>
-        /// Load default document from URL
+        /// Loads a default Word document.
         /// </summary>
         /// <returns>SFDT string</returns>
         public string LoadDefault()
@@ -151,7 +151,7 @@ namespace DocumentEditorCore
             }
         }
         /// <summary>
-        /// Perform spellcheck page by page when loading the documents
+        /// Performs spell check validation page by page while loading the documents in Document editor control.
         /// </summary>
         /// <param name="spellChecker">Receives words (string) with their language for spelling validation</param>
         /// <returns>Sends the words (string) with their language for spelling validation and sends the validation result as JSON</returns>
@@ -170,7 +170,7 @@ namespace DocumentEditorCore
         }
 
         /// <summary>
-        /// To merge the data from data source to a Word document
+        /// Performs mail merge in a Word document
         /// </summary>
         /// <param name="exportData">Receives the Docx file as base64 string</param>
         /// <returns>SFDT string</returns>
@@ -206,7 +206,7 @@ namespace DocumentEditorCore
         }
 
         /// <summary>
-        /// Load the document from URL
+        /// Loads the specified template document that is already stored in the server.
         /// </summary>
         /// <param name="uploadDocument">File name</param>
         /// <returns>SFDT string</returns>
@@ -313,9 +313,9 @@ namespace DocumentEditorCore
         }
 
         /// <summary>
-        /// Save the document in server from SFDT
+        /// Saves the document in server from SFDT
         /// </summary>
-        /// <param name="data">Received SFDT</param>
+        /// <param name="data">The SFDT file</param>
         public void Save(SaveParameter data)
         {
             string name = data.FileName != null ? data.FileName : "Saveddoc.docx";
@@ -334,7 +334,7 @@ namespace DocumentEditorCore
         }
 
         /// <summary>
-        /// Convert SFDT string to required format and returns the document as FileStreamResult
+        /// Exports the specified SFDT string to required format and sends it to the client browser.
         /// </summary>
         /// <param name="data">SFDT string</param>
         /// <returns>FileStreamResult to client-side</returns>
@@ -363,7 +363,7 @@ namespace DocumentEditorCore
 
 
         /// <summary>
-        /// Converts the DOCX document to required format and returns the document as FileStreamResult to client-side
+        /// Exports the specified DOCX file to required format and sends it to the client browser.
         /// </summary>
         /// <param name="data">Receives the Docx file</param>
         /// <returns>FileStreamResult to client-side</returns>

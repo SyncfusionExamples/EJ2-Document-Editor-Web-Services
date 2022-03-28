@@ -1,7 +1,7 @@
 ﻿namespace DocumentEditorCore
 {
     /// <summary>
-    /// Specifies the Document name to upload document
+    /// Represents the parameters required for loading a document that is already stored in the server.
     /// </summary>
     public class UploadDocument
     {

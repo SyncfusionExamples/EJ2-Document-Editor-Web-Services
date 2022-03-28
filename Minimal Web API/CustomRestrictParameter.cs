@@ -1,7 +1,7 @@
 ﻿namespace DocumentEditorCore
 {
     /// <summary>
-    /// This Class contains the property for Restrict editing
+    /// Represents the parameters required for generating the hash while protecting and unprotecting a Word document.
     /// </summary>
     public class CustomRestrictParameter
     {

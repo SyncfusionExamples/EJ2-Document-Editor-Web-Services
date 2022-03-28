@@ -1,7 +1,7 @@
 ﻿namespace DocumentEditorCore
 {
     /// <summary>
-    /// Specifies the property for Spell check functionality
+    /// Represents the parameters required for spell check validation.
     /// </summary>
     public class SpellCheckJsonData
     {

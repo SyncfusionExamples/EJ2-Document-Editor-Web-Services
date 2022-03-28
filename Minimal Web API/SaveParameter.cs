@@ -1,7 +1,7 @@
 ﻿namespace DocumentEditorCore
 {
     /// <summary>
-    /// Specifies the property for save functionality
+    /// Represents the parameters required for saving a document in server.
     /// </summary>
     public class SaveParameter
     {
