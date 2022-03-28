@@ -184,14 +184,14 @@ namespace DocumentEditorCore
             MemoryStream stream = new MemoryStream();
             stream.Write(data, 0, data.Length);
             stream.Position = 0;
+            Syncfusion.DocIO.DLS.WordDocument document;
             try
             {
-                Syncfusion.DocIO.DLS.WordDocument document = new Syncfusion.DocIO.DLS.WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
+                document = new Syncfusion.DocIO.DLS.WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
                 document.MailMerge.RemoveEmptyGroup = true;
                 document.MailMerge.RemoveEmptyParagraphs = true;
                 document.MailMerge.ClearFields = true;
                 document.MailMerge.Execute(CustomerDataModel.GetAllRecords());
-                document.Save(stream, Syncfusion.DocIO.FormatType.Docx);
             }
             catch (Exception ex)
             {
@@ -199,7 +199,7 @@ namespace DocumentEditorCore
 
             }
             string sfdtText = "";
-            Syncfusion.EJ2.DocumentEditor.WordDocument document1 = Syncfusion.EJ2.DocumentEditor.WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
+            Syncfusion.EJ2.DocumentEditor.WordDocument document1 = Syncfusion.EJ2.DocumentEditor.WordDocument.Load(document);
             sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(document1);
             document1.Dispose();
             return sfdtText;
