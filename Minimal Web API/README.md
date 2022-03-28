@@ -7,7 +7,7 @@ In this repo, We have implemented [`Minimal Web API`](https://docs.microsoft.com
 * .Net 6.0
 * Visual Studio 2022 or VS Code
 
-Please check below this [`link`](https://docs.microsoft.com/en-us/aspnet/core/tutorials/min-web-api?view=aspnetcore-6.0&tabs=visual-studio#prerequisites) to know more about prerequisites.
+Please check this [`link`](https://docs.microsoft.com/en-us/aspnet/core/tutorials/min-web-api?view=aspnetcore-6.0&tabs=visual-studio#prerequisites) to know more about prerequisites.
 
 
 ## Available Web API services in EJ2 Document Editor
