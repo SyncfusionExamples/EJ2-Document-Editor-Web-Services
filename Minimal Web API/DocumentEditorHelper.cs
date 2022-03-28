@@ -17,12 +17,12 @@ using Newtonsoft.Json;
 
 namespace DocumentEditorCore
 {
-    public class DocumentEditor
+    public class DocumentEditorHelper
     {
         internal List<Syncfusion.EJ2.SpellChecker.DictionaryData>? spellDictCollection;
         internal string? path;
         internal string? personalDictPath;
-        public DocumentEditor()
+        public DocumentEditorHelper()
         {
             //check the spell check dictionary path environment variable value and assign default data folder
             //if it is null.
@@ -43,6 +43,11 @@ namespace DocumentEditorCore
             }
         }
 
+        /// <summary>
+        /// To convert HTML/RTF to SFDT format
+        /// </summary>
+        /// <param name="param">Input parameter Html or Rtf string</param>
+        /// <returns>SFDT string</returns>
         public string SystemClipboard(CustomParameter param)
         {
             if (param.content != null && param.content != "")
@@ -62,7 +67,11 @@ namespace DocumentEditorCore
             }
             return "";
         }
-
+        /// <summary>
+        /// Extracts the content from the document (DOCX, DOC, WordML, RTF, HTML) and converts it into SFDT
+        /// </summary>
+        /// <param name="data">Input file</param>
+        /// <returns>SFDT string</returns>
         public string? Import(IFormCollection data)
         {
             if (data.Files.Count == 0)
@@ -80,6 +89,11 @@ namespace DocumentEditorCore
             document.Dispose();
             return json;
         }
+        /// <summary>
+        /// When protecting the document, for generating hash
+        /// </summary>
+        /// <param name="param">Sends the input data for hashing algorithm</param>
+        /// <returns>Hash information</returns>
         public string[]? RestrictEditing(CustomRestrictParameter param)
         {
             if (param.passwordBase64 == "" && param.passwordBase64 == null)
@@ -87,6 +101,10 @@ namespace DocumentEditorCore
             return Syncfusion.EJ2.DocumentEditor.WordDocument.ComputeHash(param.passwordBase64, param.saltBase64, param.spinCount);
         }
 
+        /// <summary>
+        /// Load default document from URL
+        /// </summary>
+        /// <returns>SFDT string</returns>
         public string LoadDefault()
         {
             string fileUrl = "https://www.syncfusion.com/downloads/support/directtrac/general/doc/Getting_Started_(5)1937944689.docx";
@@ -110,6 +128,12 @@ namespace DocumentEditorCore
                 return ex.Message;
             }
         }
+
+        /// <summary>
+        /// Performs the spell check validation for words
+        /// </summary>
+        /// <param name="spellChecker">Receives words (string) with their language for spelling validation</param>
+        /// <returns>Sends the words (string) with their language for spelling validation and sends the validation result as JSON</returns>
         public string SpellCheck(SpellCheckJsonData spellChecker)
         {
             try
@@ -123,6 +147,11 @@ namespace DocumentEditorCore
                 return "{\"SpellCollection\":[],\"HasSpellingError\":false,\"Suggestions\":null}";
             }
         }
+        /// <summary>
+        /// Perform spellcheck page by page when loading the documents
+        /// </summary>
+        /// <param name="spellChecker">Receives words (string) with their language for spelling validation</param>
+        /// <returns>Sends the words (string) with their language for spelling validation and sends the validation result as JSON</returns>
         public string SpellCheckByPage(SpellCheckJsonData spellChecker)
         {
             try
@@ -137,10 +166,17 @@ namespace DocumentEditorCore
             }
         }
 
-
-
+        /// <summary>
+        /// To merge the data from data source to a Word document
+        /// </summary>
+        /// <param name="exportData">Receives the Docx file as base64 string</param>
+        /// <returns>SFDT string</returns>
         public string MailMerge(ExportData exportData)
         {
+            if(exportData.documentData == null)
+            {
+                return string.Empty;
+            }
             Byte[] data = Convert.FromBase64String(exportData.documentData.Split(',')[1]);
             MemoryStream stream = new MemoryStream();
             stream.Write(data, 0, data.Length);
@@ -155,79 +191,28 @@ namespace DocumentEditorCore
                 document.Save(stream, Syncfusion.DocIO.FormatType.Docx);
             }
             catch (Exception ex)
-            { }
+            {
+                return ex.Message;
+
+            }
             string sfdtText = "";
             Syncfusion.EJ2.DocumentEditor.WordDocument document1 = Syncfusion.EJ2.DocumentEditor.WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
             sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(document1);
             document1.Dispose();
             return sfdtText;
         }
-        public class CustomerDataModel
-        {
-            public static List<Customer> GetAllRecords()
-            {
-                List<Customer> customers = new List<Customer>();
-                customers.Add(new Customer("9072379", "50%", "C/ Araquil, 67", "Madrid", "22020-08-10 00:00:00", "Spain", "Brittania", "2000", "19072379", "Folk och fä HB", "100000", "440", "32.34", "472.34", "28023", "12000", "2020-11-07 00:00:00", "2020-12-07 00:00:00"));
-                customers.Add(new Customer("9072378", "20%", "C/ Araquil, 67", "Madrid", "22020-08-10 00:00:00", "Spain", "", "2", "19072369", "Maersk", "140000", "245", "20", "265", "28024", "12400", "2020-11-31 00:00:00", "2020-12-22300:00:00"));
-                customers.Add(new Customer("9072377", "30%", "C/ Araquil, 67", "Madrid", "22020-08-10 00:00:00", "Spain", "Brittania", "100", "19072879", "Mediterranean Shipping Company", "104000", "434", "50.43", "484.43", "28025", "10000", "2020-11-07 00:00:00", "2020-12-02 00:00:00"));
-                customers.Add(new Customer("9072393", "10%", "C/ Araquil, 67", "Madrid", "22020-08-10 00:00:00", "Spain", "Brittania", "2050", "19072378", "China Ocean Shipping Company", "175000", "500", "32", "532", "28026", "17000", "2020-09-23 00:00:00", "2020-10-09 00:00:00"));
-                customers.Add(new Customer("9072377", "14%", "C/ Araquil, 67", "Madrid", "22020-08-10 00:00:00", "Spain", "Brittania", "2568", "19072380", "CGM", "155000", "655", "20.54", "675.54", "28027", "13000", "2020-10-11 00:00:00", "2020-11-17 00:00:00"));
-                customers.Add(new Customer("9072376", "0%", "C/ Araquil, 67", "Madrid", "22020-08-10 00:00:00", "Spain", "Brittania", "1532", "19072345", " Hapag-Lloyd", "106500", "344", "30", "374", "28028", "14500", "2020-06-17 00:00:00", "2020-07-07 00:00:00"));
-                customers.Add(new Customer("9072369", "05%", "C/ Araquil, 67", "Madrid", "22020-08-10 00:00:00", "Spain", "Brittania", "4462", "190723452", "Ocean Network Express", "100054", "541", "50", "591", "28029", "16500", "2020-04-07 00:00:00", "2020-05-07 00:00:00"));
-                customers.Add(new Customer("9072359", "4%", "C/ Araquil, 67", "Madrid", "22020-08-10 00:00:00", "Spain", "Brittania", "27547", "190723713", "Evergreen Line", "124000", "800", "10.23", "810.23", "28030", "12500", "2020-03-07 00:00:00", "2020-04-07 00:00:00"));
-                customers.Add(new Customer("9072380", "20%", "C/ Araquil, 67", "Madrid", "22020-08-10 00:00:00", "Spain", "Brittania", "7582", "19072312", "Yang Ming Marine Transport", "1046000", "290", "10", "300", "27631", "12670", "2020-11-10 00:00:00", "2020-12-13 00:00:00"));
-                customers.Add(new Customer("9072381", "42%", "C/ Araquil, 67", "Madrid", "22020-08-10 00:00:00", "Spain", "Brittania", "862", "19072354", "Hyundai Merchant Marine", "145000", "800", "10.23", "810.23", "28032", "45000", "2020-10-17 00:00:00", "2020-12-23 00:00:00"));
-                customers.Add(new Customer("9072391", "84%", "C/ Araquil, 67", "Madrid", "22020-08-10 00:00:00", "Spain", "Brittania", "82", "19072364", "Pacific International Line", "10094677", "344", "30", "374", "28033", "16500", "2020-11-14 00:00:00", "2020-12-21 00:00:00"));
-                customers.Add(new Customer("9072392", "92%", "C/ Araquil, 67", "Madrid", "22020-08-10 00:00:00", "Spain", "Brittania", "82", "19072385", "Österreichischer Lloyd", "104270", "500", "32", "532", "28034", "156500", "2020-06-07 00:00:00", "2020-07-07 00:00:00"));
-                return customers;
-            }
-        }
-        public class Customer
-        {
-            public string CustomerID { get; set; }
-            public string ProductName { get; set; }
-            public string Quantity { get; set; }
-            public string ShipName { get; set; }
-            public string UnitPrice { get; set; }
-            public string Discount { get; set; }
-            public string ShipAddress { get; set; }
-            public string ShipCity { get; set; }
-            public string OrderDate { get; set; }
-            public string ShipCountry { get; set; }
-            public string OrderId { get; set; }
-            public string Subtotal { get; set; }
-            public string Freight { get; set; }
-            public string Total { get; set; }
-            public string ShipPostalCode { get; set; }
-            public string RequiredDate { get; set; }
-            public string ShippedDate { get; set; }
-            public string ExtendedPrice { get; set; }
-            public Customer(string orderId, string discount, string shipAddress, string shipCity, string orderDate, string shipCountry, string productName, string quantity, string customerID, string shipName, string unitPrice, string subtotal, string freight, string total, string shipPostalCode, string extendedPrice, string requiredDate, string shippedDate)
-            {
-                this.CustomerID = customerID;
-                this.ProductName = productName;
-                this.Quantity = quantity;
-                this.ShipName = shipName;
-                this.UnitPrice = unitPrice;
-                this.Discount = discount;
-                this.ShipAddress = shipAddress;
-                this.ShipCity = shipCity;
-                this.OrderDate = orderDate;
-                this.ShipCountry = shipCountry;
-                this.OrderId = orderId;
-                this.Subtotal = subtotal;
-                this.Freight = freight;
-                this.Total = total;
-                this.ShipPostalCode = shipPostalCode;
-                this.ShippedDate = shippedDate;
-                this.RequiredDate = requiredDate;
-                this.ExtendedPrice = extendedPrice;
-            }
-        }
 
-
-        public string LoadDocument(UploadDocument uploadDocument)
+        /// <summary>
+        /// Load the document from URL
+        /// </summary>
+        /// <param name="uploadDocument">File name</param>
+        /// <returns>SFDT string</returns>
+        public string? LoadDocument(UploadDocument uploadDocument)
         {
+            if(path == null || uploadDocument.DocumentName == null)
+            {
+                return null;
+            }
             string documentPath = Path.Combine(path, uploadDocument.DocumentName);
             Stream? stream = null;
             if (System.IO.File.Exists(documentPath))
@@ -324,7 +309,10 @@ namespace DocumentEditorCore
             }
         }
 
-
+        /// <summary>
+        /// Save the document in server from SFDT
+        /// </summary>
+        /// <param name="data">Received SFDT</param>
         public void Save(SaveParameter data)
         {
             string name = data.FileName != null ? data.FileName : "Saveddoc.docx";
@@ -342,7 +330,11 @@ namespace DocumentEditorCore
             fileStream.Close();
         }
 
-
+        /// <summary>
+        /// Convert SFDT string to required format and returns the document as FileStreamResult
+        /// </summary>
+        /// <param name="data">SFDT string</param>
+        /// <returns>FileStreamResult to client-side</returns>
         public FileStreamResult ExportSFDT(SaveParameter data)
         {
 
@@ -367,10 +359,11 @@ namespace DocumentEditorCore
 
 
 
-        [AcceptVerbs("Post")]
-        [HttpPost]
-        [EnableCors("AllowAllOrigins")]
-        [Route("Export")]
+        /// <summary>
+        /// Converts the DOCX document to required format and returns the document as FileStreamResult to client-side
+        /// </summary>
+        /// <param name="data">Receives the Docx file</param>
+        /// <returns>FileStreamResult to client-side</returns>
         public FileStreamResult? Export(IFormCollection data)
         {
             if (data.Files.Count == 0)
@@ -456,40 +449,6 @@ namespace DocumentEditorCore
         }
 
     }
-    public class CustomParameter
-    {
-        public string? content { get; set; }
-        public string type { get; set; }
-    }
-    public class CustomRestrictParameter
-    {
-        public string? passwordBase64 { get; set; }
-        public string? saltBase64 { get; set; }
-        public int spinCount { get; set; }
-    }
 
-    public class SaveParameter
-    {
-        public string? Content { get; set; }
-        public string? FileName { get; set; }
-    }
-    public class SpellCheckJsonData
-    {
-        public int LanguageID { get; set; }
-        public string? TexttoCheck { get; set; }
-        public bool CheckSpelling { get; set; }
-        public bool CheckSuggestion { get; set; }
-        public bool AddWord { get; set; }
-
-    }
-    public class ExportData
-    {
-        public string? fileName { get; set; }
-        public string? documentData { get; set; }
-    }
-    public class UploadDocument
-    {
-        public string? DocumentName { get; set; }
-    }
 
 }
