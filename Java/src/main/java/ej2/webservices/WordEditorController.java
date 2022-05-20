@@ -31,15 +31,13 @@ import com.syncfusion.ej2.wordprocessor.FormatType;
 
 @RestController
 public class WordEditorController {
-	List<DictionaryData> spellDictionary;
-    String personalDictPath;
+
 	public WordEditorController() throws Exception {
-	
 	String jsonFilePath = "src/main/resources/spellcheck.json";
 	String jsonContent = new String(Files.readAllBytes(Paths.get(jsonFilePath)), StandardCharsets.UTF_8);
 	JsonArray spellDictionaryItems = new Gson().fromJson(jsonContent, JsonArray.class);
-	personalDictPath = "src/main/resources/customDict.dic";
-	spellDictionary = new ArrayList<DictionaryData>();
+	String personalDictPath = "src/main/resources/customDict.dic";
+	List<DictionaryData> spellDictionary = new ArrayList<DictionaryData>();
 	for(int i = 0; i < spellDictionaryItems.size(); i++) {
 	    JsonObject spellCheckerInfo = spellDictionaryItems.get(i).getAsJsonObject();
 	    DictionaryData dict = new DictionaryData();
@@ -52,6 +50,7 @@ public class WordEditorController {
 	    	dict.setAffixPath("src/main/resources/"+spellCheckerInfo.get("AffixPath").getAsString());
 	    spellDictionary.add(dict);
 	}
+	SpellChecker.initializeDictionaries(spellDictionary, personalDictPath, 3);
 	}
 
 	@CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -76,7 +75,7 @@ public class WordEditorController {
 	@PostMapping("/api/wordeditor/SpellCheck")
 	public String spellCheck(@RequestBody SpellCheckJsonData spellChecker) throws Exception {
 		try {
-			   SpellChecker spellCheck = new SpellChecker(spellDictionary,personalDictPath);
+			   SpellChecker spellCheck = new SpellChecker();
                String data = spellCheck.getSuggestions(spellChecker.languageID, spellChecker.texttoCheck, spellChecker.checkSpelling, spellChecker.checkSuggestion, spellChecker.addWord);
               return data;
 		} catch (Exception e) {
@@ -89,7 +88,7 @@ public class WordEditorController {
 	@PostMapping("/api/wordeditor/SpellCheckByPage")
 	public String spellCheckByPage(@RequestBody SpellCheckJsonData spellChecker) throws Exception {
 		try {
-			   SpellChecker spellCheck = new SpellChecker(spellDictionary,personalDictPath);
+			   SpellChecker spellCheck = new SpellChecker();
                String data = spellCheck.checkSpelling(spellChecker.languageID, spellChecker.texttoCheck);
               return data;
 		} catch (Exception e) {
