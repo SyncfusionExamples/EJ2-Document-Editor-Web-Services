@@ -462,6 +462,9 @@ namespace SyncfusionDocument.Controllers
                     case WFormatType.Dotx:
                         contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.template";
                         break;
+                    case WFormatType.Docx:
+                        contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                        break;
                     case WFormatType.Doc:
                         contentType = "application/msword";
                         break;
