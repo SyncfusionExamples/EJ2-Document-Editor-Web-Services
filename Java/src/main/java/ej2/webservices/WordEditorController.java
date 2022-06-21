@@ -187,6 +187,9 @@ public class WordEditorController {
 		case "Dotx":
 			contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.template";
 			break;
+		case "Docx":
+                        contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                        break;
 		case "Html":
 			contentType = "application/html";
 			break;
