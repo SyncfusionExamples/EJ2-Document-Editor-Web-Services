@@ -29,9 +29,9 @@ namespace DocumentEditorCore
         {
             //check the spell check dictionary path environment variable value and assign default data folder
             //if it is null.
-            path = Path.Combine("\\App_Data\\");
+            path = Path.Combine("//App_Data//");
             //Set the default spellcheck.json file if the json filename is empty.
-            string jsonFileName = Path.Combine("\\App_Data\\spellcheck.json");
+            string jsonFileName = Path.Combine("//App_Data//spellcheck.json");
             if (System.IO.File.Exists(jsonFileName))
             {
                 string jsonImport = System.IO.File.ReadAllText(jsonFileName);

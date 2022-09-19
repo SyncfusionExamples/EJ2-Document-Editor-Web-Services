@@ -21,9 +21,9 @@ namespace EJ2DocumentEditorWebServices
             GlobalConfiguration.Configure(WebApiConfig.Register);
             //check the spell check dictionary path environment variable value and assign default data folder
             //if it is null.
-            string path = HostingEnvironment.MapPath("\\App_Data\\");
+            string path = HostingEnvironment.MapPath("//App_Data//");
             //Set the default spellcheck.json file if the json filename is empty.
-            string jsonFileName = HostingEnvironment.MapPath("\\App_Data\\spellcheck.json");        
+            string jsonFileName = HostingEnvironment.MapPath("//App_Data//spellcheck.json");        
             if (System.IO.File.Exists(jsonFileName))
             {
                 string jsonImport = System.IO.File.ReadAllText(jsonFileName);
