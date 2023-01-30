@@ -15,12 +15,9 @@ namespace EJ2DocumentEditorWebServices.Controllers
     [RoutePrefix("api/documenteditor")]
     public class DocumentEditorController : ApiController
     {
-        List<DictionaryData> spellDictionary;
-        string personalDictPath;
         public DocumentEditorController()
         {
-            spellDictionary = WebApiApplication.spellDictCollection;
-            personalDictPath = WebApiApplication.personalDictPath;
+
         }
 
         [HttpPost]
@@ -84,7 +81,7 @@ namespace EJ2DocumentEditorWebServices.Controllers
         {
             try
             {
-                SpellChecker spellCheck = new SpellChecker(spellDictionary, personalDictPath);
+                SpellChecker spellCheck = new SpellChecker();
                 spellCheck.GetSuggestions(spellChecker.LanguageID, spellChecker.TexttoCheck, spellChecker.CheckSpelling, spellChecker.CheckSuggestion, spellChecker.AddWord);
                 string json = Newtonsoft.Json.JsonConvert.SerializeObject(spellCheck);
                 return new HttpResponseMessage() { Content = new StringContent(json) };
@@ -102,7 +99,7 @@ namespace EJ2DocumentEditorWebServices.Controllers
         {
             try
             {
-                SpellChecker spellCheck = new SpellChecker(spellDictionary, personalDictPath);
+                SpellChecker spellCheck = new SpellChecker();
                 spellCheck.CheckSpelling(spellChecker.LanguageID, spellChecker.TexttoCheck);
                 string json = Newtonsoft.Json.JsonConvert.SerializeObject(spellCheck);
                 return new HttpResponseMessage() { Content = new StringContent(json) };
