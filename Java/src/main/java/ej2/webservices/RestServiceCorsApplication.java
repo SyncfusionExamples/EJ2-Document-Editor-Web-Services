@@ -8,6 +8,11 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+// Refer the licensing package
+import com.syncfusion.licensing.*;
+
+// Register Syncfusion license 
+SyncfusionLicenseProvider.registerLicense("YOUR LICENSE KEY"); 
 
 @SpringBootApplication
 public class RestServiceCorsApplication extends SpringBootServletInitializer {
