@@ -22,27 +22,30 @@ namespace DocumentEditorCore
     /// </summary>
     public class DocumentEditorHelper
     {
-        internal List<Syncfusion.EJ2.SpellChecker.DictionaryData>? spellDictCollection;
         internal string? path;
-        internal string? personalDictPath;
-        public DocumentEditorHelper()
+        public DocumentEditorHelper(IHostEnvironment environment)
         {
             //check the spell check dictionary path environment variable value and assign default data folder
             //if it is null.
-            path = Path.Combine("//App_Data//");
+            path = Path.Combine(environment.ContentRootPath + "App_Data");
             //Set the default spellcheck.json file if the json filename is empty.
-            string jsonFileName = Path.Combine("//App_Data//spellcheck.json");
+            string jsonFileName = Path.Combine(path, "spellcheck.json");
             if (System.IO.File.Exists(jsonFileName))
             {
                 string jsonImport = System.IO.File.ReadAllText(jsonFileName);
-                List<DictionaryData> spellChecks = JsonConvert.DeserializeObject<List<DictionaryData>>(jsonImport);
-                spellDictCollection = new List<DictionaryData>();
+                List<DictionaryData>? spellChecks = JsonConvert.DeserializeObject<List<DictionaryData>>(jsonImport);
+                List<DictionaryData> spellDictCollection = new List<DictionaryData>();
+                string? personalDictPath = null;
                 //construct the dictionary file path using customer provided path and dictionary name
-                foreach (var spellCheck in spellChecks)
+                if (spellChecks != null)
                 {
-                    spellDictCollection.Add(new DictionaryData(spellCheck.LanguadeID, Path.Combine(path, spellCheck.DictionaryPath), Path.Combine(path, spellCheck.AffixPath)));
-                    personalDictPath = Path.Combine(path, spellCheck.PersonalDictPath);
+                    foreach (var spellCheck in spellChecks)
+                    {
+                        spellDictCollection.Add(new DictionaryData(spellCheck.LanguadeID, Path.Combine(path, spellCheck.DictionaryPath), Path.Combine(path, spellCheck.AffixPath)));
+                        personalDictPath = Path.Combine(path, spellCheck.PersonalDictPath);
+                    }
                 }
+                SpellChecker.InitializeDictionaries(spellDictCollection, personalDictPath, 3);
             }
         }
 
@@ -87,11 +90,47 @@ namespace DocumentEditorCore
             file.CopyTo(stream);
             stream.Position = 0;
 
+            //Hooks MetafileImageParsed event.
+            WordDocument.MetafileImageParsed += OnMetafileImageParsed;
             Syncfusion.EJ2.DocumentEditor.WordDocument document = Syncfusion.EJ2.DocumentEditor.WordDocument.Load(stream, GetFormatType(type.ToLower()));
+            //Unhooks MetafileImageParsed event.
+            WordDocument.MetafileImageParsed -= OnMetafileImageParsed;
+
             string json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
             document.Dispose();
             return json;
         }
+
+        //Converts Metafile to raster image.
+        private static void OnMetafileImageParsed(object sender, MetafileImageParsedEventArgs args)
+        {
+            //You can write your own method definition for converting metafile to raster image using any third-party image converter.
+            args.ImageStream = ConvertMetafileToRasterImage(args.MetafileStream);
+        }
+
+        private static Stream ConvertMetafileToRasterImage(Stream ImageStream)
+        {
+            //Here we are loading a default raster image as fallback.
+            Stream imgStream = GetManifestResourceStream("ImageNotFound.jpg");
+            return imgStream;
+            //To do : Write your own logic for converting metafile to raster image using any third-party image converter(Syncfusion doesn't provide any image converter).
+        }
+
+        private static Stream GetManifestResourceStream(string fileName)
+        {
+            System.Reflection.Assembly execAssembly = typeof(WDocument).Assembly;
+            string[] resourceNames = execAssembly.GetManifestResourceNames();
+            foreach (string resourceName in resourceNames)
+            {
+                if (resourceName.EndsWith("." + fileName))
+                {
+                    fileName = resourceName;
+                    break;
+                }
+            }
+            return execAssembly.GetManifestResourceStream(fileName);
+        }
+
         /// <summary>
         /// Generates the hash for protecting a Word document.
         /// </summary>
@@ -141,7 +180,7 @@ namespace DocumentEditorCore
         {
             try
             {
-                SpellChecker spellCheck = new SpellChecker(spellDictCollection, personalDictPath);
+                SpellChecker spellCheck = new SpellChecker();
                 spellCheck.GetSuggestions(spellChecker.LanguageID, spellChecker.TexttoCheck, spellChecker.CheckSpelling, spellChecker.CheckSuggestion, spellChecker.AddWord);
                 return Newtonsoft.Json.JsonConvert.SerializeObject(spellCheck);
             }
@@ -159,7 +198,7 @@ namespace DocumentEditorCore
         {
             try
             {
-                SpellChecker spellCheck = new SpellChecker(spellDictCollection, personalDictPath);
+                SpellChecker spellCheck = new SpellChecker();
                 spellCheck.CheckSpelling(spellChecker.LanguageID, spellChecker.TexttoCheck);
                 return Newtonsoft.Json.JsonConvert.SerializeObject(spellCheck);
             }

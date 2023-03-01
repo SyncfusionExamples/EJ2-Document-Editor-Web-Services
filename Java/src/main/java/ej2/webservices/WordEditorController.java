@@ -21,6 +21,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import com.syncfusion.ej2.wordprocessor.WordProcessorHelper;
+import com.syncfusion.javahelper.system.collections.generic.ListSupport;
+import com.syncfusion.javahelper.system.io.StreamSupport;
+import com.syncfusion.javahelper.system.reflection.AssemblySupport;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -28,6 +31,8 @@ import com.syncfusion.ej2.spellchecker.DictionaryData;
 import com.syncfusion.ej2.spellchecker.SpellChecker;
 import com.syncfusion.docio.WordDocument;
 import com.syncfusion.ej2.wordprocessor.FormatType;
+import com.syncfusion.ej2.wordprocessor.MetafileImageParsedEventArgs;
+import com.syncfusion.ej2.wordprocessor.MetafileImageParsedEventHandler;
 
 @RestController
 public class WordEditorController {
@@ -63,13 +68,71 @@ public class WordEditorController {
 	@CrossOrigin(origins = "*", allowedHeaders = "*")
 	@PostMapping("/api/wordeditor/Import")
 	public String importFile(@RequestParam("files") MultipartFile file) throws Exception {
-		try {
-			return WordProcessorHelper.load(file.getInputStream(), FormatType.Docx);
+		try {	
+			String name = file.getOriginalFilename();
+			if (name == null || name.isEmpty()) {
+				name = "Document1.docx";
+			}
+			String format = retrieveFileType(name);
+			
+			MetafileImageParsedEventHandler metafileImageParsedEvent = new MetafileImageParsedEventHandler() {
+
+	            ListSupport<MetafileImageParsedEventHandler> delegateList = new ListSupport<MetafileImageParsedEventHandler>(
+	                    MetafileImageParsedEventHandler.class);
+
+	            // Represents event handling for MetafileImageParsedEventHandlerCollection.
+	            public void invoke(Object sender, MetafileImageParsedEventArgs args) throws Exception {
+	            	onMetafileImageParsed(sender, args);
+	            }
+
+	            // Represents the method that handles MetafileImageParsed event.
+	            public void dynamicInvoke(Object... args) throws Exception {
+	            	onMetafileImageParsed((Object) args[0], (MetafileImageParsedEventArgs) args[1]);
+	            }
+
+	            // Represents the method that handles MetafileImageParsed event to add collection item.
+	            public void add(MetafileImageParsedEventHandler delegate) throws Exception {
+	                if (delegate != null)
+	                    delegateList.add(delegate);
+	            }
+
+	            // Represents the method that handles MetafileImageParsed event to remove collection
+	            // item.
+	            public void remove(MetafileImageParsedEventHandler delegate) throws Exception {
+	                if (delegate != null)
+	                    delegateList.remove(delegate);
+	            }
+	        };
+	        // Hooks MetafileImageParsed event.
+	        WordProcessorHelper.MetafileImageParsed.add("OnMetafileImageParsed", metafileImageParsedEvent);
+	        // Converts DocIO DOM to SFDT DOM.
+	        String sfdtContent = WordProcessorHelper.load(file.getInputStream(), getFormatType(format));
+	        // Unhooks MetafileImageParsed event.
+	        WordProcessorHelper.MetafileImageParsed.remove("OnMetafileImageParsed", metafileImageParsedEvent);
+	        return sfdtContent;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "{\"sections\":[{\"blocks\":[{\"inlines\":[{\"text\":" + e.getMessage() + "}]}]}]}";
 		}
 	}
+	
+	// Converts Metafile to raster image.
+	private static void onMetafileImageParsed(Object sender, MetafileImageParsedEventArgs args) throws Exception {
+	    // You can write your own method definition for converting Metafile to raster image using any third-party image converter.
+	    args.setImageStream(convertMetafileToRasterImage(args.getMetafileStream()));
+	}
+	
+	private static StreamSupport convertMetafileToRasterImage(StreamSupport ImageStream) throws Exception {
+        //Here we are loading a default raster image as fallback.
+		StreamSupport imgStream = getManifestResourceStream("ImageNotFound.jpg");
+        return imgStream;
+        //To do : Write your own logic for converting Metafile to raster image using any third-party image converter(Syncfusion doesn't provide any image converter).
+    }
+
+    private static StreamSupport getManifestResourceStream(String fileName) throws Exception {
+    	AssemblySupport assembly = AssemblySupport.getExecutingAssembly();
+        return assembly.getManifestResourceStream("ImageNotFound.jpg");
+    }
 	
 	@CrossOrigin(origins = "*", allowedHeaders = "*")
 	@PostMapping("/api/wordeditor/SpellCheck")
@@ -111,7 +174,7 @@ public class WordEditorController {
 	public String systemClipboard(@RequestBody CustomParameter param) {
 		if (param.content != null && param.content != "") {
 			try {
-				return  WordProcessorHelper.loadString(param.content, GetFormatType(param.type.toLowerCase()));
+				return  WordProcessorHelper.loadString(param.content, getFormatType(param.type.toLowerCase()));
 			} catch (Exception e) {
 				return "";
 			}
@@ -143,10 +206,11 @@ public class WordEditorController {
 	public ResponseEntity<Resource> exportSFDT(@RequestBody SaveParameter data) throws Exception {
 		try {
 			String name = data.getFileName();
-			String format = retrieveFileType(name);
 			if (name == null || name.isEmpty()) {
 				name = "Document1.docx";
 			}
+			String format = retrieveFileType(name);
+
 			WordDocument document = WordProcessorHelper.save(data.getContent());
 			return saveDocument(document, format);
 		} catch (Exception ex) {
@@ -159,10 +223,11 @@ public class WordEditorController {
 	public ResponseEntity<Resource> export(@RequestParam("data") MultipartFile data, String fileName) throws Exception {
 		try {
 			String name = fileName;
-			String format = retrieveFileType(name);
 			if (name == null || name.isEmpty()) {
 				name = "Document1";
 			}
+			String format = retrieveFileType(name);
+
 			WordDocument document = new WordDocument(data.getInputStream(), com.syncfusion.docio.FormatType.Docx);
 			return saveDocument(document, format);
 		} catch (Exception ex) {
@@ -185,8 +250,8 @@ public class WordEditorController {
 			contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.template";
 			break;
 		case "Docx":
-                        contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-                        break;
+            contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            break;
 		case "Html":
 			contentType = "application/html";
 			break;
@@ -231,7 +296,7 @@ public class WordEditorController {
 		}
 	}
 	
-	static FormatType GetFormatType(String format)
+	static FormatType getFormatType(String format)
     {
         switch (format)
         {
