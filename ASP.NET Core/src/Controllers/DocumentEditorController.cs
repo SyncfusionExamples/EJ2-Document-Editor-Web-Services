@@ -118,7 +118,27 @@ namespace SyncfusionDocument.Controllers
                 document.MailMerge.RemoveEmptyGroup = true;
                 document.MailMerge.RemoveEmptyParagraphs = true;
                 document.MailMerge.ClearFields = true;
+                //hook MergeField
+                document.MailMerge.MergeField += TextMerging;
+                hyperlinks.Clear();
                 document.MailMerge.Execute(CustomerDataModel.GetAllRecords());
+                //un-hook MergeField
+                document.MailMerge.MergeField -= TextMerging;
+                // replace hyperlink
+                for (int i = 0; i < hyperlinks.Count; i++)
+                {
+                    //Replaces the placeholder text enclosed within '«' and '»' with desired merge field
+                    Syncfusion.DocIO.DLS.WParagraph paragraph = new Syncfusion.DocIO.DLS.WParagraph(document);
+                    string currentPalceHolder = hyperlinks[i];
+                    string display = currentPalceHolder.Split('_')[2];
+                    string value = currentPalceHolder.Split('_')[3];
+                    paragraph.AppendHyperlink(value, display, Syncfusion.DocIO.DLS.HyperlinkType.Bookmark);
+                    Syncfusion.DocIO.DLS.TextSelection newSelection = new Syncfusion.DocIO.DLS.TextSelection(paragraph, 0, paragraph.Items.Count);
+                    Syncfusion.DocIO.DLS.TextBodyPart bodyPart = new Syncfusion.DocIO.DLS.TextBodyPart(document);
+                    bodyPart.BodyItems.Add(paragraph);
+                    document.Replace(hyperlinks[i], bodyPart, true, true, true);
+                }
+                hyperlinks.Clear();
                 document.Save(stream, Syncfusion.DocIO.FormatType.Docx);
             }
             catch (Exception ex)
@@ -129,6 +149,18 @@ namespace SyncfusionDocument.Controllers
             document1.Dispose();
             return sfdtText;
         }
+         private void TextMerging(object sender, Syncfusion.DocIO.DLS.MergeFieldEventArgs args)
+        {
+            //Sets text color to the alternate mail merge record
+            if (args.FieldName == "ProductName")
+            {
+                args.Text = "Placeholder_Hyperlink_" + args.Text + "_ProductName";
+                hyperlinks.Add(args.Text);
+            }
+        }
+
+        List<string> hyperlinks = new List<string>();
+        
         public class CustomerDataModel
         {
             public static List<Customer> GetAllRecords()
