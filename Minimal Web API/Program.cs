@@ -31,7 +31,7 @@ app.UseHttpsRedirection();
 app.UseCors("AllowAllOrigins");
 
 
-var documentEditorHelper = new DocumentEditorHelper();
+var documentEditorHelper = new DocumentEditorHelper(app.Environment);
 
 /// <summary>
 /// Loads a default Word document.
@@ -121,4 +121,7 @@ app.MapPost("/LoadDocument", (UploadDocument uploadDocument) =>
     return documentEditorHelper.LoadDocument(uploadDocument);
 });
 
-app.Run("https://localhost:8000/api/documenteditor");
+app.UsePathBase("/api/documenteditor");
+app.UseRouting();
+
+app.Run("https://localhost:8000/");

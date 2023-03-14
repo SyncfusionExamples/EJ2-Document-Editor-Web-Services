@@ -45,10 +45,45 @@ namespace SyncfusionDocument.Controllers
             file.CopyTo(stream);
             stream.Position = 0;
 
+            //Hooks MetafileImageParsed event.
+            WordDocument.MetafileImageParsed += OnMetafileImageParsed;
             WordDocument document = WordDocument.Load(stream, GetFormatType(type.ToLower()));
+            //Unhooks MetafileImageParsed event.
+            WordDocument.MetafileImageParsed -= OnMetafileImageParsed;
+
             string json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
             document.Dispose();
             return json;
+        }
+
+        //Converts Metafile to raster image.
+        private static void OnMetafileImageParsed(object sender, MetafileImageParsedEventArgs args)
+        {
+            //You can write your own method definition for converting metafile to raster image using any third-party image converter.
+            args.ImageStream = ConvertMetafileToRasterImage(args.MetafileStream);
+        }
+
+        private static Stream ConvertMetafileToRasterImage(Stream ImageStream)
+        {
+            //Here we are loading a default raster image as fallback.
+            Stream imgStream = GetManifestResourceStream("ImageNotFound.jpg");
+            return imgStream;
+            //To do : Write your own logic for converting metafile to raster image using any third-party image converter(Syncfusion doesn't provide any image converter).
+        }
+
+        private static Stream GetManifestResourceStream(string fileName)
+        {
+            System.Reflection.Assembly execAssembly = typeof(WDocument).Assembly;
+            string[] resourceNames = execAssembly.GetManifestResourceNames();
+            foreach (string resourceName in resourceNames)
+            {
+                if (resourceName.EndsWith("." + fileName))
+                {
+                    fileName = resourceName;
+                    break;
+                }
+            }
+            return execAssembly.GetManifestResourceStream(fileName);
         }
 
         [AcceptVerbs("Post")]
@@ -216,7 +251,11 @@ namespace SyncfusionDocument.Controllers
             {
                 try
                 {
+                    //Hooks MetafileImageParsed event.
+                    WordDocument.MetafileImageParsed += OnMetafileImageParsed;
                     WordDocument document = WordDocument.LoadString(param.content, GetFormatType(param.type.ToLower()));
+                    //Unhooks MetafileImageParsed event.
+                    WordDocument.MetafileImageParsed -= OnMetafileImageParsed;
                     string json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
                     document.Dispose();
                     return json;
