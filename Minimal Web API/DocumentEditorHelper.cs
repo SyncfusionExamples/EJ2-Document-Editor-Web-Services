@@ -60,8 +60,11 @@ namespace DocumentEditorCore
             {
                 try
                 {
-
+                    //Hooks MetafileImageParsed event.
+                    Syncfusion.EJ2.DocumentEditor.WordDocument.MetafileImageParsed += OnMetafileImageParsed;
                     Syncfusion.EJ2.DocumentEditor.WordDocument document = Syncfusion.EJ2.DocumentEditor.WordDocument.LoadString(param.content, GetFormatType(param.type.ToLower()));
+                    //Unhooks MetafileImageParsed event.
+                    Syncfusion.EJ2.DocumentEditor.WordDocument.MetafileImageParsed -= OnMetafileImageParsed;
                     string json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
                     document.Dispose();
                     return json;

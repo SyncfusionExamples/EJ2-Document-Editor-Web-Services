@@ -174,7 +174,40 @@ public class WordEditorController {
 	public String systemClipboard(@RequestBody CustomParameter param) {
 		if (param.content != null && param.content != "") {
 			try {
-				return  WordProcessorHelper.loadString(param.content, getFormatType(param.type.toLowerCase()));
+				MetafileImageParsedEventHandler metafileImageParsedEvent = new MetafileImageParsedEventHandler() {
+
+					ListSupport<MetafileImageParsedEventHandler> delegateList = new ListSupport<MetafileImageParsedEventHandler>(
+							MetafileImageParsedEventHandler.class);
+	
+					// Represents event handling for MetafileImageParsedEventHandlerCollection.
+					public void invoke(Object sender, MetafileImageParsedEventArgs args) throws Exception {
+						onMetafileImageParsed(sender, args);
+					}
+	
+					// Represents the method that handles MetafileImageParsed event.
+					public void dynamicInvoke(Object... args) throws Exception {
+						onMetafileImageParsed((Object) args[0], (MetafileImageParsedEventArgs) args[1]);
+					}
+	
+					// Represents the method that handles MetafileImageParsed event to add collection item.
+					public void add(MetafileImageParsedEventHandler delegate) throws Exception {
+						if (delegate != null)
+							delegateList.add(delegate);
+					}
+	
+					// Represents the method that handles MetafileImageParsed event to remove collection
+					// item.
+					public void remove(MetafileImageParsedEventHandler delegate) throws Exception {
+						if (delegate != null)
+							delegateList.remove(delegate);
+					}
+				};
+				// Hooks MetafileImageParsed event.
+				WordProcessorHelper.MetafileImageParsed.add("OnMetafileImageParsed", metafileImageParsedEvent);
+				String json = WordProcessorHelper.loadString(param.content, getFormatType(param.type.toLowerCase()));
+				// Unhooks MetafileImageParsed event.
+				WordProcessorHelper.MetafileImageParsed.remove("OnMetafileImageParsed", metafileImageParsedEvent);
+				return json;
 			} catch (Exception e) {
 				return "";
 			}
