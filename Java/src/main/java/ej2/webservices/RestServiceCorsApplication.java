@@ -35,7 +35,9 @@ public class RestServiceCorsApplication extends SpringBootServletInitializer {
 	@Bean
 	public MultipartConfigElement multipartConfigElement() {
 	    MultipartConfigFactory factory = new MultipartConfigFactory();
+		// Increased the max file size upto 1 GB to resolve the issue of uploading large files.
 	    factory.setMaxFileSize(DataSize.ofBytes(1073741824));
+		// Increased the max request size upto 1 GB to resolve the issue of uploading large files.
 	    factory.setMaxRequestSize(DataSize.ofBytes(1073741824));
 	    return factory.createMultipartConfig();
 	}
