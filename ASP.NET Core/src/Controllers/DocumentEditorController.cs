@@ -136,7 +136,83 @@ namespace SyncfusionDocument.Controllers
             public string DocumentName { get; set; }
         }
 
+        [AcceptVerbs("Post")]
+        [HttpPost]
+        [EnableCors("AllowAllOrigins")]
+        [Route("FindReplace")]
+        public string FindReplace([FromBody] ExportData exportData)
+        {
 
+            Byte[] data = Convert.FromBase64String(exportData.documentData.Split(',')[1]);
+            MemoryStream stream = new MemoryStream();
+            stream.Write(data, 0, data.Length);
+            stream.Position = 0;
+            try
+            {
+                Syncfusion.DocIO.DLS.WordDocument document = new Syncfusion.DocIO.DLS.WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
+                foreach (KeyValuePair<string, string> item in GetData())
+                {
+                    document.Replace(item.Key.ToString(), item.Value.ToString(), true, true);
+                }
+                document.Save(stream, Syncfusion.DocIO.FormatType.Docx);
+            }
+            catch (Exception ex)
+            { }
+            string sfdtText = "";
+            Syncfusion.EJ2.DocumentEditor.WordDocument document1 = Syncfusion.EJ2.DocumentEditor.WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
+            document1.OptimizeSfdt = false;
+            sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(document1);
+            document1.Dispose();
+            return sfdtText;
+        }
+
+        [AcceptVerbs("Post")]
+        [HttpPost]
+        [EnableCors("AllowAllOrigins")]
+        [Route("Back")]
+        public string Back([FromBody] ExportData exportData)
+        {
+
+            Byte[] data = Convert.FromBase64String(exportData.documentData.Split(',')[1]);
+            MemoryStream stream = new MemoryStream();
+            stream.Write(data, 0, data.Length);
+            stream.Position = 0;
+            try
+            {
+                Syncfusion.DocIO.DLS.WordDocument document = new Syncfusion.DocIO.DLS.WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
+                foreach (KeyValuePair<string, string> item in GetData())
+                {
+                    document.Replace(item.Value.ToString(), item.Key.ToString(), true, true);
+                }
+                document.Save(stream, Syncfusion.DocIO.FormatType.Docx);
+            }
+            catch (Exception ex)
+            { }
+            string sfdtText = "";
+            Syncfusion.EJ2.DocumentEditor.WordDocument document1 = Syncfusion.EJ2.DocumentEditor.WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
+            document1.OptimizeSfdt = false;
+            sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(document1);
+            document1.Dispose();
+            return sfdtText;
+        }
+        /// <summary>
+        /// Get the datas to perform find and replace.
+        /// </summary>
+        /// public class CustomerDataModel
+
+        private Dictionary<string, string> GetData()
+        {
+            Dictionary<string, string> data = new Dictionary<string, string>();
+            data.Add("<<Note.PPE>>", "$11000");
+            data.Add("<<Note.Capital_management>>", "$12000");
+            data.Add("<<Note.Intangible Assets>>", "$13000");
+            data.Add("<<Note.Right Use of Assets>>", "$14000");
+            data.Add("<<Date.C.PCD.[dd MMMM yyyy]>>", "$15000");
+            data.Add("<<IG.C.IS_Other income>>", "$16000");
+            data.Add("<<IG.C.IS_Other Expenses>>", "$17000");
+            data.Add("<<IG.C.IS_Finance Cost>>", "$18000");
+            return data;
+        }
         [AcceptVerbs("Post")]
         [HttpPost]
         [EnableCors("AllowAllOrigins")]
