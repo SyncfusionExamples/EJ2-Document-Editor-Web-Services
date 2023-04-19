@@ -152,7 +152,7 @@ namespace SyncfusionDocument.Controllers
                 Syncfusion.DocIO.DLS.WordDocument document = new Syncfusion.DocIO.DLS.WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
                 foreach (KeyValuePair<string, string> item in GetData())
                 {
-                    document.Replace(item.Key.ToString(), item.Value.ToString(), true, true);
+                    document.Replace(item.Key.ToString(), item.Value.ToString(), true, false);
                 }
                 document.Save(stream, Syncfusion.DocIO.FormatType.Docx);
             }
@@ -182,7 +182,7 @@ namespace SyncfusionDocument.Controllers
                 Syncfusion.DocIO.DLS.WordDocument document = new Syncfusion.DocIO.DLS.WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
                 foreach (KeyValuePair<string, string> item in GetData())
                 {
-                    document.Replace(item.Value.ToString(), item.Key.ToString(), true, true);
+                    document.Replace(item.Value.ToString(), item.Key.ToString(), true, false);
                 }
                 document.Save(stream, Syncfusion.DocIO.FormatType.Docx);
             }
