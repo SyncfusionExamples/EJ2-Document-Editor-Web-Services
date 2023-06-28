@@ -34,6 +34,15 @@ import com.syncfusion.ej2.wordprocessor.FormatType;
 import com.syncfusion.ej2.wordprocessor.MetafileImageParsedEventArgs;
 import com.syncfusion.ej2.wordprocessor.MetafileImageParsedEventHandler;
 
+import java.util.Map;
+import java.io.InputStream;
+import java.lang.reflect.Array;
+import com.syncfusion.javahelper.system.ConvertSupport;
+import com.syncfusion.javahelper.system.StringSupport;
+import com.syncfusion.javahelper.system.collections.generic.DictionarySupport;
+import com.syncfusion.javahelper.system.io.MemoryStreamSupport;
+import com.syncfusion.javahelper.system.io.StreamSupport;
+
 @RestController
 public class WordEditorController {
 
@@ -57,7 +66,61 @@ public class WordEditorController {
 	}
 	SpellChecker.initializeDictionaries(spellDictionary, personalDictPath, 3);
 	}
+@CrossOrigin(origins = "*", allowedHeaders = "*")
+    @PostMapping("/api/wordeditor/FindReplace")
+    public String findReplace(@RequestBody ExportData exportData) throws Exception {
+        byte[] data = ConvertSupport.fromBase64String(StringSupport.split(exportData.getDocumentData(), ',')[1]);
+        StreamSupport stream = new MemoryStreamSupport();
+        stream.write(data, 0, Array.getLength(data));
+        stream.setPosition(0);
+        InputStream inputStream = StreamSupport.toStream(stream);
+        stream.close();
+        String sfdtText = "";
+        try {
+            WordDocument document = new WordDocument(inputStream, com.syncfusion.docio.FormatType.Docx);
+            inputStream.close();
+            for (Object item : getData().entrySet()) {
+                Map.Entry<String, String> entry = (Map.Entry<String, String>) item;
+                document.replace(entry.getKey(), entry.getValue(), true, false);
+            }
+            sfdtText = WordProcessorHelper.load(document);
+        } catch (Exception ex) {
 
+        }
+        return sfdtText;
+    }
+
+    @CrossOrigin(origins = "*", allowedHeaders = "*")
+    @PostMapping("/api/wordeditor/Back")
+    public String back(@RequestBody ExportData exportData) throws Exception {
+        byte[] data = ConvertSupport.fromBase64String(StringSupport.split(exportData.getDocumentData(), ',')[1]);
+        StreamSupport stream = new MemoryStreamSupport();
+        stream.write(data, 0, Array.getLength(data));
+        stream.setPosition(0);
+        InputStream inputStream = StreamSupport.toStream(stream);
+        stream.close();
+        String sfdtText = "";
+        try {
+            WordDocument document = new WordDocument(inputStream, com.syncfusion.docio.FormatType.Docx);
+            inputStream.close();
+            for (Object item : getData().entrySet()) {
+                Map.Entry<String, String> entry = (Map.Entry<String, String>) item;
+                document.replace(entry.getValue(), entry.getKey(), true, false);
+            }
+            sfdtText = WordProcessorHelper.load(document);
+        } catch (Exception ex) {
+
+        }
+        return sfdtText;
+    }
+
+    private DictionarySupport<String, String> getData() throws Exception {
+        DictionarySupport<String, String> data = new DictionarySupport<String, String>(String.class, String.class);
+        data.add("{{OFF_IN_CSTDY.OIC_INCDNUM}}", "replace with first");
+        data.add("{{OFF_IN_CSTDY.OIC_INCDTE1}}", "replace with second");
+
+        return data;
+    }
 	@CrossOrigin(origins = "*", allowedHeaders = "*")
 	@GetMapping("/api/wordeditor/test")
 	public String test() {
