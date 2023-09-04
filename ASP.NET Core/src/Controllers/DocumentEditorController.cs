@@ -114,56 +114,6 @@ namespace EJ2APIServices.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("SaveAsContent")]
-        public string SaveAsContent([FromBody] ExportAsContentParameter args)
-        {
-            string documentName = args.DocumentName;
-            for (int i = 0; i < args.PageContents.Length; i++)
-            {
-                string fileName = string.Format("{0}-{1}.txt", documentName, (i + 1));
-                using (StreamWriter writer = new StreamWriter(fileName))
-                {
-                    string content = ReplaceDecimalValues(args.PageContents[i]);
-                    writer.Write(content);
-                    writer.Dispose();
-                }
-            }
-            return Newtonsoft.Json.JsonConvert.SerializeObject("Success");
-        }
-
-        private string ReplaceDecimalValues(string inputText)
-        {
-            // Finds all the occurrence of decimal values with minimum 1 decimal place and suffix string ";".
-            string regexPatternForDecimalValue = "([-]?[0-9]*[.]{1}[0-9]*[;])";
-            MatchCollection matches = Regex.Matches(inputText, regexPatternForDecimalValue);
-            Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();
-            foreach (Match matchItem in matches)
-            {
-                if (keyValuePairs.ContainsKey(matchItem.Value))
-                    continue;
-                string num = matchItem.Value.Replace(";", "");
-                double doubleValue;
-                if (double.TryParse(num, out doubleValue))
-                {
-                    string result = Math.Truncate(doubleValue).ToString();
-                    keyValuePairs.Add(matchItem.Value, result + ";");
-                }
-            }
-            //Purpose is to resolve decimal precision mismatch in output content.
-            foreach (var keyValue in keyValuePairs)
-            {
-                inputText = inputText.Replace(keyValue.Key, keyValue.Value);
-            }
-            return inputText;
-        }
-
-        public class ExportAsContentParameter
-        {
-            public string DocumentName { get; set; }
-            public string[] PageContents { get; set; }
-        }
-
         public class SpellCheckJsonData
         {
             public int LanguageID { get; set; }
