@@ -75,6 +75,8 @@ namespace SyncfusionDocument.Controllers
 
 			}
         }
+
+		// Converting Tiff to Png image using Bitmiracle https://www.nuget.org/packages/BitMiracle.LibTiff.NET
 		private static MemoryStream TiffToPNG(Stream tiffStream)
 		{
 			MemoryStream imageStream = new MemoryStream();
