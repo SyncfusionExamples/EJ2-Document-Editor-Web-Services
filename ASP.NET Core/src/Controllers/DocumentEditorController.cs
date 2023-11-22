@@ -14,7 +14,6 @@ using WDocument = Syncfusion.DocIO.DLS.WordDocument;
 using WFormatType = Syncfusion.DocIO.FormatType;
 using Syncfusion.EJ2.SpellChecker;
 using EJ2APIServices;
-using System.Drawing;
 using SkiaSharp;
 using BitMiracle.LibTiff.Classic;
 
