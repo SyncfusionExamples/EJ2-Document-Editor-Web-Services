@@ -24,7 +24,6 @@ dependencies {
 	implementation 'com.syncfusion:syncfusion-javahelper:+'
 	implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.7.0'
 	implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.7.0'
-	implementation group: 'org.apache.commons', name: 'commons-imaging', version: '1.0'
 	compile 'com.google.code.gson:gson:2.8.6'
 	testImplementation 'org.apache.httpcomponents:httpclient'
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {

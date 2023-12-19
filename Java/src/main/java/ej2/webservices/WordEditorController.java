@@ -129,24 +129,24 @@ public class WordEditorController {
 	// Converts Metafile to raster image.
 	private static void onMetafileImageParsed(Object sender, MetafileImageParsedEventArgs args) throws Exception {
 		if(args.getIsMetafile()) {	    
-			// You can write your own method definition for converting Metafile to raster image using any third-party image converter.
-			args.setImageStream(convertMetafileToRasterImage(args.getMetafileStream()));
+	       // You can write your own method definition for converting Metafile to raster image using any third-party image converter.
+	       args.setImageStream(convertMetafileToRasterImage(args.getMetafileStream()));
 		}else {
-			InputStream inputStream = StreamSupport.toStream(args.getMetafileStream());
-			// Use ByteArrayOutputStream to collect data into a byte array
-			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+	       InputStream inputStream = StreamSupport.toStream(args.getMetafileStream());
+	       // Use ByteArrayOutputStream to collect data into a byte array
+	       ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 	      
-			// Read data from the InputStream and write it to the ByteArrayOutputStream
-			byte[] buffer = new byte[1024];
-			int bytesRead;
-			while ((bytesRead = inputStream.read(buffer)) != -1) {
-			    byteArrayOutputStream.write(buffer, 0, bytesRead);
-			}
+	       // Read data from the InputStream and write it to the ByteArrayOutputStream
+	       byte[] buffer = new byte[1024];
+	       int bytesRead;
+	       while ((bytesRead = inputStream.read(buffer)) != -1) {
+	           byteArrayOutputStream.write(buffer, 0, bytesRead);
+	       }
 	      
-			// Convert the ByteArrayOutputStream to a byte array
-			byte[] tiffData = byteArrayOutputStream.toByteArray();
-			// Read TIFF image from byte array
-			ByteArrayInputStream tiffInputStream = new ByteArrayInputStream(tiffData);
+	       // Convert the ByteArrayOutputStream to a byte array
+	       byte[] tiffData = byteArrayOutputStream.toByteArray();
+	       // Read TIFF image from byte array
+	       ByteArrayInputStream tiffInputStream = new ByteArrayInputStream(tiffData);
 	        IIORegistry.getDefaultInstance().registerServiceProvider(new TIFFImageReaderSpi());
 
 	        // Create ImageReader and ImageWriter instances
