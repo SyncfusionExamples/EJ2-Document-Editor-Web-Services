@@ -7,8 +7,17 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.ImageWriter;
+import javax.imageio.spi.IIORegistry;
+
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -24,6 +33,7 @@ import com.syncfusion.ej2.wordprocessor.WordProcessorHelper;
 import com.syncfusion.javahelper.system.collections.generic.ListSupport;
 import com.syncfusion.javahelper.system.io.StreamSupport;
 import com.syncfusion.javahelper.system.reflection.AssemblySupport;
+import com.twelvemonkeys.imageio.plugins.tiff.TIFFImageReaderSpi;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -118,8 +128,44 @@ public class WordEditorController {
 	
 	// Converts Metafile to raster image.
 	private static void onMetafileImageParsed(Object sender, MetafileImageParsedEventArgs args) throws Exception {
-	    // You can write your own method definition for converting Metafile to raster image using any third-party image converter.
-	    args.setImageStream(convertMetafileToRasterImage(args.getMetafileStream()));
+		if(args.getIsMetafile()) {	    
+	       // You can write your own method definition for converting Metafile to raster image using any third-party image converter.
+	       args.setImageStream(convertMetafileToRasterImage(args.getMetafileStream()));
+		}else {
+	       InputStream inputStream = StreamSupport.toStream(args.getMetafileStream());
+	       // Use ByteArrayOutputStream to collect data into a byte array
+	       ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+	      
+	       // Read data from the InputStream and write it to the ByteArrayOutputStream
+	       byte[] buffer = new byte[1024];
+	       int bytesRead;
+	       while ((bytesRead = inputStream.read(buffer)) != -1) {
+	           byteArrayOutputStream.write(buffer, 0, bytesRead);
+	       }
+	      
+	       // Convert the ByteArrayOutputStream to a byte array
+	       byte[] tiffData = byteArrayOutputStream.toByteArray();
+	       // Read TIFF image from byte array
+	       ByteArrayInputStream tiffInputStream = new ByteArrayInputStream(tiffData);
+	        IIORegistry.getDefaultInstance().registerServiceProvider(new TIFFImageReaderSpi());
+
+	        // Create ImageReader and ImageWriter instances
+	        ImageReader tiffReader = ImageIO.getImageReadersByFormatName("TIFF").next();
+	        ImageWriter pngWriter = ImageIO.getImageWritersByFormatName("PNG").next();
+
+	        // Set up input and output streams
+	        tiffReader.setInput(ImageIO.createImageInputStream(tiffInputStream));
+	        ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
+	        pngWriter.setOutput(ImageIO.createImageOutputStream(pngOutputStream));
+
+	        // Read the TIFF image and write it as a PNG
+	        BufferedImage image = tiffReader.read(0);
+	        pngWriter.write(image);
+	        pngWriter.dispose();
+	        byte[] jpgData = pngOutputStream.toByteArray();
+	        InputStream jpgStream = new ByteArrayInputStream(jpgData);
+	        args.setImageStream(StreamSupport.toStream(jpgStream));
+		}
 	}
 	
 	private static StreamSupport convertMetafileToRasterImage(StreamSupport ImageStream) throws Exception {
