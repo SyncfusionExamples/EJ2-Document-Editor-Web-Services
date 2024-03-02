@@ -305,8 +305,41 @@ namespace SyncfusionDocument.Controllers
             public string documentData { get; set; }
         }
 
+        [AcceptVerbs("Post")]
+        [HttpPost]
+        [EnableCors("AllowAllOrigins")]
+        [Route("CompareWordDocument")]
+        public string CompareWordDocument([FromBody] SaveParameter data)
+        {
+            //Load the original document.
+            using (FileStream originalDocumentStreamPath = new FileStream("OriginalDocument.docx", FileMode.Open, FileAccess.Read))
+            {
+                using (WDocument originalDocument = new WDocument(originalDocumentStreamPath, WFormatType.Docx))
+                {
+                    //Load the revised document.
+                    using (FileStream revisedDocumentStreamPath = new FileStream("RevisedDocument.docx", FileMode.Open, FileAccess.Read))
+                    {
+                        using (WDocument revisedDocument = new WDocument(revisedDocumentStreamPath, WFormatType.Docx))
+                        {
+                            // Compare the original and revised Word documents.
+                            originalDocument.Compare(revisedDocument);
 
+                            //Save the Word document to MemoryStream
+                            MemoryStream stream = new MemoryStream();
+                            originalDocument.Save(stream, WFormatType.Docx);
+                            originalDocument.Close();
+                            revisedDocument.Close();
 
+                            WordDocument result = WordDocument.Load(stream, FormatType.Docx);
+                            string sfdtString = Newtonsoft.Json.JsonConvert.SerializeObject(result);
+                            result.Dispose();
+                            stream.Close();
+                            return sfdtString;
+                        }
+                    }
+                }
+            }
+        }
 
         public class CustomParameter
         {
