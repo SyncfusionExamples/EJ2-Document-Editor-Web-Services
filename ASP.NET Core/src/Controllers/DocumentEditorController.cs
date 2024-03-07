@@ -22,10 +22,10 @@ namespace SyncfusionDocument.Controllers
     [Route("api/[controller]")]
     public class DocumentEditorController : Controller
     {
-        private readonly IHostingEnvironment _hostingEnvironment;
+        private readonly IWebHostEnvironment  _hostingEnvironment;
         string path;
 
-        public DocumentEditorController(IHostingEnvironment hostingEnvironment)
+        public DocumentEditorController(IWebHostEnvironment  hostingEnvironment)
         {
             _hostingEnvironment = hostingEnvironment;
             path = Startup.path;

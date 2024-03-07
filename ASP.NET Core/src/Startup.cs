@@ -9,7 +9,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Data.Edm;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNetCore.Routing;
@@ -20,6 +19,7 @@ using EJ2APIServices.Controllers;
 using Syncfusion.EJ2.SpellChecker;
 using System.IO;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Hosting;
 
 
 namespace EJ2APIServices
@@ -29,7 +29,7 @@ namespace EJ2APIServices
         private string _contentRootPath = "";
         internal static string path;
 
-        public Startup(IConfiguration configuration, IHostingEnvironment env)
+        public Startup(IConfiguration configuration, IWebHostEnvironment  env)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
@@ -66,11 +66,13 @@ namespace EJ2APIServices
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
+        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddOData();
-            services.AddMvc().AddJsonOptions(x => {
-                x.SerializerSettings.ContractResolver = null;
+            services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.PropertyNamingPolicy = null;
             });
 
             services.AddCors(options =>
@@ -78,36 +80,42 @@ namespace EJ2APIServices
                 options.AddPolicy("AllowAllOrigins", builder =>
                 {
                     builder.AllowAnyOrigin()
-                    .AllowAnyMethod()
-                    .AllowAnyHeader();
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
                 });
             });
+
             string connection = Configuration.GetConnectionString("Test");
             if (connection.Contains("%CONTENTROOTPATH%"))
             {
                 connection = connection.Replace("%CONTENTROOTPATH%", _contentRootPath);
-
             }
-            services.AddEntityFrameworkNpgsql().AddDbContext<EEJ2SERVICEEJ2WEBSERVICESSRCAPP_DATADIAGRAMMDFContext>(options => options.UseNpgsql(connection));
+
+            services.AddDbContext<EEJ2SERVICEEJ2WEBSERVICESSRCAPP_DATADIAGRAMMDFContext>(options =>
+                options.UseNpgsql(connection));
+
             // Add framework services.
-            services.AddMvc();
+            services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseDeveloperExceptionPage();
-            app.UseCors("AllowAllOrigins");
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseMvc(b =>
-            {
-                b.Count().Filter().OrderBy().Expand().Select().MaxTop(null);
-            });
+            app.UseCors("AllowAllOrigins");
 
+            app.UseRouting();
+
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
 
     }
