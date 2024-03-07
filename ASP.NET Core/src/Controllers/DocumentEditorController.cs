@@ -650,15 +650,15 @@ namespace SyncfusionDocument.Controllers
         [HttpPost]
         [EnableCors("AllowAllOrigins")]
         [Route("CompareUrlFiles")]
-        public string CompareUrlFiles(string originalFilePath, string revisedFilePath)
+        public string CompareUrlFiles([FromBody] CompareParameter data)
         {
-            if (originalFilePath == null || revisedFilePath == null)
+            if (data.OriginalFilePath == null || data.RevisedFilePath == null)
                 return null;
             Stream stream = new MemoryStream();
-            stream = GetDocumentFromURL(originalFilePath).Result;
+            stream = GetDocumentFromURL(data.OriginalFilePath).Result;
             stream.Position = 0;
             Stream stream1 = new MemoryStream();
-            stream1 = GetDocumentFromURL(revisedFilePath).Result;
+            stream1 = GetDocumentFromURL(data.RevisedFilePath).Result;
             stream1.Position = 0;
             string json = "";
             WordDocument.MetafileImageParsed -= OnMetafileImageParsed;
@@ -675,6 +675,11 @@ namespace SyncfusionDocument.Controllers
                 }
             }
             return json;
+        }
+        public class CompareParameter
+        {
+            public string OriginalFilePath { get; set; }
+            public string RevisedFilePath { get; set; }
         }
     }
 }
