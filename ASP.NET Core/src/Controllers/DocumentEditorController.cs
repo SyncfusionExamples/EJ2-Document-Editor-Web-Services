@@ -612,5 +612,76 @@ namespace SyncfusionDocument.Controllers
             stream.Dispose();
             return document;
         }
+        [AcceptVerbs("Post")]
+        [HttpPost]
+        [EnableCors("AllowAllOrigins")]
+        [Route("Compare")]
+        public string CompareFiles(IFormFile originalFile, IFormFile revisedFile)
+        {
+            if (originalFile == null || revisedFile == null)
+                return null;
+            Stream stream = new MemoryStream();
+            int index = originalFile.FileName.LastIndexOf('.');
+            string type = index > -1 && index < originalFile.FileName.Length - 1 ? originalFile.FileName.Substring(index) : ".docx";
+            originalFile.CopyTo(stream);
+            stream.Position = 0;
+            Stream stream1 = new MemoryStream();
+            int index1 = revisedFile.FileName.LastIndexOf('.');
+            string type1 = index > -1 && index < revisedFile.FileName.Length - 1 ? revisedFile.FileName.Substring(index) : ".docx";
+            revisedFile.CopyTo(stream1);
+            stream1.Position = 0;
+            string json = "";
+            WordDocument.MetafileImageParsed -= OnMetafileImageParsed;
+
+            using (WDocument originalDocument = new WDocument(stream, WFormatType.Docx))
+            {
+                //Load the revised document.
+                using (WDocument revisedDocument = new WDocument(stream1, WFormatType.Docx))
+                {
+                    // Compare the original and revised Word documents.
+                    originalDocument.Compare(revisedDocument);
+                    //Save the Word document to MemoryStream
+                    MemoryStream stream2 = new MemoryStream();
+                    WordDocument document = WordDocument.Load(stream, GetFormatType(type.ToLower()));
+                    json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
+                    originalDocument.Dispose();
+                    revisedDocument.Dispose();
+                    document.Dispose();
+                }
+            }
+            return json;
+        }
+
+        [AcceptVerbs("Post")]
+        [HttpPost]
+        [EnableCors("AllowAllOrigins")]
+        [Route("CompareUrlFiles")]
+        public string CompareUrlFiles(string originalFilePath, string revisedFilePath)
+        {
+            if (originalFilePath == null || revisedFilePath == null)
+                return null;
+            Stream stream = new MemoryStream();
+            stream = GetDocumentFromURL(originalFilePath).Result;
+            stream.Position = 0;
+            Stream stream1 = new MemoryStream();
+            stream1 = GetDocumentFromURL(revisedFilePath).Result;
+            stream1.Position = 0;
+            string json = "";
+            WordDocument.MetafileImageParsed -= OnMetafileImageParsed;
+            using (WDocument originalDocument = new WDocument(stream, WFormatType.Docx))
+            {
+                using (WDocument revisedDocument = new WDocument(stream1, WFormatType.Docx))
+                {
+                    originalDocument.Compare(revisedDocument);
+                    MemoryStream stream2 = new MemoryStream();
+                    WordDocument document = WordDocument.Load(stream2, GetFormatType(".docx"));
+                    json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
+                    originalDocument.Dispose();
+                    revisedDocument.Dispose();
+                    document.Dispose();
+                }
+            }
+            return json;
+        }
     }
 }
