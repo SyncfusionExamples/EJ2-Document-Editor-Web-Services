@@ -616,15 +616,15 @@ namespace SyncfusionDocument.Controllers
         [HttpPost]
         [EnableCors("AllowAllOrigins")]
         [Route("Compare")]
-        public string CompareFiles(IFormFile originalFile, IFormFile revisedFile)
+        public string CompareFiles([FromBody] CompareParameter data)
         {
-            if (originalFile == null || revisedFile == null)
+            if (data.OriginalFile == null || data.RevisedFile == null)
                 return null;
             Stream stream = new MemoryStream();
-            originalFile.CopyTo(stream);
+            data.OriginalFile.CopyTo(stream);
             stream.Position = 0;
             Stream stream1 = new MemoryStream();
-            revisedFile.CopyTo(stream1);
+            data.RevisedFile.CopyTo(stream1);
             stream1.Position = 0;
             string json = "";
             WordDocument.MetafileImageParsed -= OnMetafileImageParsed;
@@ -650,21 +650,15 @@ namespace SyncfusionDocument.Controllers
         [HttpPost]
         [EnableCors("AllowAllOrigins")]
         [Route("CompareUrlFiles")]
-        public string CompareUrlFiles([FromBody] CompareParameter data)
+        public string CompareUrlFiles([FromBody] CompareUrlParameter data)
         {
             if (data.OriginalFilePath == null || data.RevisedFilePath == null)
                 return null;
-            Stream stream = new MemoryStream();
-            stream = GetDocumentFromURL(data.OriginalFilePath).Result;
-            stream.Position = 0;
-            Stream stream1 = new MemoryStream();
-            stream1 = GetDocumentFromURL(data.RevisedFilePath).Result;
-            stream1.Position = 0;
             string json = "";
             WordDocument.MetafileImageParsed -= OnMetafileImageParsed;
-            using (WDocument originalDocument = new WDocument(stream, WFormatType.Docx))
+            using (WDocument originalDocument = new WDocument(GetDocFromURL(data.OriginalFilePath).Result, WFormatType.Docx))
             {
-                using (WDocument revisedDocument = new WDocument(stream1, WFormatType.Docx))
+                using (WDocument revisedDocument = new WDocument(GetDocFromURL(data.RevisedFilePath).Result, WFormatType.Docx))
                 {
                     originalDocument.Compare(revisedDocument);
                     WordDocument document = WordDocument.Load(originalDocument);
@@ -676,10 +670,39 @@ namespace SyncfusionDocument.Controllers
             }
             return json;
         }
-        public class CompareParameter
+        public class CompareUrlParameter
         {
             public string OriginalFilePath { get; set; }
             public string RevisedFilePath { get; set; }
         }
+        public class CompareParameter
+        {
+            public IFormFile OriginalFile { get; set; }
+            public IFormFile RevisedFile { get; set; }
+        }
+
+        async Task<Stream> GetDocFromURL(string url)
+        {
+            string documentPath = Path.Combine(path, url);
+            Stream stream = null;
+            if (System.IO.File.Exists(documentPath))
+            {
+                byte[] bytes = System.IO.File.ReadAllBytes(documentPath);
+                stream = new MemoryStream(bytes);
+            }
+            else
+            {
+                bool result = Uri.TryCreate(url, UriKind.Absolute, out Uri uriResult)
+                    && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+                if (result)
+                {
+                    stream = GetDocumentFromURL(url).Result;
+                    if (stream != null)
+                        stream.Position = 0;
+                }
+            }
+            return stream;
+        }
+
     }
 }
