@@ -621,13 +621,9 @@ namespace SyncfusionDocument.Controllers
             if (originalFile == null || revisedFile == null)
                 return null;
             Stream stream = new MemoryStream();
-            int index = originalFile.FileName.LastIndexOf('.');
-            string type = index > -1 && index < originalFile.FileName.Length - 1 ? originalFile.FileName.Substring(index) : ".docx";
             originalFile.CopyTo(stream);
             stream.Position = 0;
             Stream stream1 = new MemoryStream();
-            int index1 = revisedFile.FileName.LastIndexOf('.');
-            string type1 = index > -1 && index < revisedFile.FileName.Length - 1 ? revisedFile.FileName.Substring(index) : ".docx";
             revisedFile.CopyTo(stream1);
             stream1.Position = 0;
             string json = "";
@@ -642,7 +638,7 @@ namespace SyncfusionDocument.Controllers
                     originalDocument.Compare(revisedDocument);
                     //Save the Word document to MemoryStream
                     MemoryStream stream2 = new MemoryStream();
-                    WordDocument document = WordDocument.Load(stream, GetFormatType(type.ToLower()));
+                    WordDocument document = WordDocument.Load(stream2, FormatType.Docx);
                     json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
                     originalDocument.Dispose();
                     revisedDocument.Dispose();
@@ -674,7 +670,7 @@ namespace SyncfusionDocument.Controllers
                 {
                     originalDocument.Compare(revisedDocument);
                     MemoryStream stream2 = new MemoryStream();
-                    WordDocument document = WordDocument.Load(stream2, GetFormatType(".docx"));
+                    WordDocument document = WordDocument.Load(stream2, FormatType.Docx);
                     json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
                     originalDocument.Dispose();
                     revisedDocument.Dispose();
