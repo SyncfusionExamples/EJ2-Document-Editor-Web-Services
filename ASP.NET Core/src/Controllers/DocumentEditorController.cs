@@ -636,7 +636,7 @@ namespace SyncfusionDocument.Controllers
                 {
                     // Compare the original and revised Word documents.
                     originalDocument.Compare(revisedDocument);
-                    WordDocument document = WordDocument.Load(stream, FormatType.Docx);
+                    WordDocument document = WordDocument.Load(originalDocument);
                     json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
                     originalDocument.Dispose();
                     revisedDocument.Dispose();
@@ -667,7 +667,7 @@ namespace SyncfusionDocument.Controllers
                 using (WDocument revisedDocument = new WDocument(stream1, WFormatType.Docx))
                 {
                     originalDocument.Compare(revisedDocument);
-                    WordDocument document = WordDocument.Load(stream, FormatType.Docx);
+                    WordDocument document = WordDocument.Load(originalDocument);
                     json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
                     originalDocument.Dispose();
                     revisedDocument.Dispose();
