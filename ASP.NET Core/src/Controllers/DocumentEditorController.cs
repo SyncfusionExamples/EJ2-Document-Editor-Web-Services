@@ -1,14 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
-using System.Text;
-using System.IO;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Syncfusion.EJ2.DocumentEditor;
 using WDocument = Syncfusion.DocIO.DLS.WordDocument;
 using WFormatType = Syncfusion.DocIO.FormatType;
@@ -17,15 +10,15 @@ using EJ2APIServices;
 using SkiaSharp;
 using BitMiracle.LibTiff.Classic;
 
-namespace SyncfusionDocument.Controllers
+namespace EJ2APIServices.Controllers
 {
     [Route("api/[controller]")]
     public class DocumentEditorController : Controller
     {
-        private readonly IHostingEnvironment _hostingEnvironment;
-        string path;
+        private readonly IWebHostEnvironment _hostingEnvironment;
+        string? path;
 
-        public DocumentEditorController(IHostingEnvironment hostingEnvironment)
+        public DocumentEditorController(IWebHostEnvironment hostingEnvironment)
         {
             _hostingEnvironment = hostingEnvironment;
             path = Startup.path;
@@ -37,7 +30,7 @@ namespace SyncfusionDocument.Controllers
         [Route("Import")]
         public string Import(IFormCollection data)
         {
-            if (data.Files.Count == 0)
+             if (data.Files.Count == 0)
                 return null;
             Stream stream = new MemoryStream();
             IFormFile file = data.Files[0];
@@ -165,7 +158,7 @@ namespace SyncfusionDocument.Controllers
         [Route("SpellCheck")]
         public string SpellCheck([FromBody] SpellCheckJsonData spellChecker)
         {
-            try
+             try
             {
                 SpellChecker spellCheck = new SpellChecker();
                 spellCheck.GetSuggestions(spellChecker.LanguageID, spellChecker.TexttoCheck, spellChecker.CheckSpelling, spellChecker.CheckSuggestion, spellChecker.AddWord);
