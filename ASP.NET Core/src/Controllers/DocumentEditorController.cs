@@ -230,7 +230,9 @@ namespace SyncfusionDocument.Controllers
                 document.Save(stream, Syncfusion.DocIO.FormatType.Docx);
             }
             catch (Exception ex)
-            { }
+            {
+                return ex.Message;
+            }
             string sfdtText = "";
             Syncfusion.EJ2.DocumentEditor.WordDocument document1 = Syncfusion.EJ2.DocumentEditor.WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
             sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(document1);

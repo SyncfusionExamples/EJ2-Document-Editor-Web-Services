@@ -16,7 +16,7 @@ namespace EJ2APIServices
 {
     public class Startup
     {
-        internal static string? path;
+        internal static string path;
 
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
@@ -29,7 +29,7 @@ namespace EJ2APIServices
             Configuration = builder.Build();
 
             path = Configuration["SPELLCHECK_DICTIONARY_PATH"];
-            string? jsonFileName = Configuration["SPELLCHECK_JSON_FILENAME"];
+            string jsonFileName = Configuration["SPELLCHECK_JSON_FILENAME"];
             //check the spell check dictionary path environment variable value and assign default data folder
             //if it is null.
             path = string.IsNullOrEmpty(path) ? Path.Combine(env.ContentRootPath, "Data") : Path.Combine(env.ContentRootPath, path);
@@ -38,9 +38,9 @@ namespace EJ2APIServices
             if (File.Exists(jsonFileName))
             {
                 string jsonImport = File.ReadAllText(jsonFileName);
-                List<DictionaryData>? spellChecks = JsonConvert.DeserializeObject<List<DictionaryData>>(jsonImport);
+                List<DictionaryData> spellChecks = JsonConvert.DeserializeObject<List<DictionaryData>>(jsonImport);
                 List<DictionaryData> spellDictCollection = new List<DictionaryData>();
-                string? personalDictPath = null;
+                string personalDictPath = null;
                 //construct the dictionary file path using customer provided path and dictionary name
                 if (spellChecks != null)
                 {

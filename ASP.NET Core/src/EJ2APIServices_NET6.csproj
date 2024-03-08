@@ -19,7 +19,6 @@
 
   <ItemGroup>
     <PackageReference Include="BitMiracle.LibTiff.NET" Version="2.4.649" />
-    <PackageReference Include="Microsoft.AspNetCore.App" Version="*" />
   </ItemGroup>
 
   <ItemGroup>
