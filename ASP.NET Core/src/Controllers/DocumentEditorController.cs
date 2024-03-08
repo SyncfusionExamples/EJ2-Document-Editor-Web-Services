@@ -612,5 +612,95 @@ namespace SyncfusionDocument.Controllers
             stream.Dispose();
             return document;
         }
+        
+        [AcceptVerbs("Post")]
+        [HttpPost]
+        [EnableCors("AllowAllOrigins")]
+        [Route("CompareDocuments")]
+        public string CompareDocuments([FromBody] CompareParameter data)
+        {
+            if (data.OriginalFile == null || data.RevisedFile == null)
+                return null;
+            Stream originalDocumentStream = new MemoryStream();
+            data.OriginalFile.CopyTo(originalDocumentStream);
+            originalDocumentStream.Position = 0;
+            Stream revisedDocumentStream = new MemoryStream();
+            data.RevisedFile.CopyTo(revisedDocumentStream);
+            revisedDocumentStream.Position = 0;
+            string json = "";
+
+            using (WDocument originalDocument = new WDocument(originalDocumentStream, WFormatType.Docx))
+            {
+                //Load the revised document.
+                using (WDocument revisedDocument = new WDocument(revisedDocumentStream, WFormatType.Docx))
+                {
+                    // Compare the original and revised Word documents.
+                    originalDocument.Compare(revisedDocument);
+                    WordDocument document = WordDocument.Load(originalDocument);
+                    json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
+                    originalDocument.Dispose();
+                    revisedDocument.Dispose();
+                    document.Dispose();
+                }
+            }
+            return json;
+        }
+
+        [AcceptVerbs("Post")]
+        [HttpPost]
+        [EnableCors("AllowAllOrigins")]
+        [Route("CompareDocumentsFromUrl")]
+        public string CompareDocumentsFromUrl([FromBody] CompareUrlParameter data)
+        {
+            if (data.OriginalFilePath == null || data.RevisedFilePath == null)
+                return null;
+            string json = "";
+            using (WDocument originalDocument = new WDocument(GetDocFromURL(data.OriginalFilePath).Result, WFormatType.Docx))
+            {
+                using (WDocument revisedDocument = new WDocument(GetDocFromURL(data.RevisedFilePath).Result, WFormatType.Docx))
+                {
+                    originalDocument.Compare(revisedDocument);
+                    WordDocument document = WordDocument.Load(originalDocument);
+                    json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
+                    originalDocument.Dispose();
+                    revisedDocument.Dispose();
+                    document.Dispose();
+                }
+            }
+            return json;
+        }
+        public class CompareUrlParameter
+        {
+            public string OriginalFilePath { get; set; }
+            public string RevisedFilePath { get; set; }
+        }
+        public class CompareParameter
+        {
+            public IFormFile OriginalFile { get; set; }
+            public IFormFile RevisedFile { get; set; }
+        }
+
+        async Task<Stream> GetDocFromURL(string url)
+        {
+            string documentPath = Path.Combine(path, url);
+            Stream stream = null;
+            if (System.IO.File.Exists(documentPath))
+            {
+                byte[] bytes = System.IO.File.ReadAllBytes(documentPath);
+                stream = new MemoryStream(bytes);
+            }
+            else
+            {
+                bool result = Uri.TryCreate(url, UriKind.Absolute, out Uri uriResult)
+                    && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+                if (result)
+                {
+                    stream = GetDocumentFromURL(url).Result;
+                    if (stream != null)
+                        stream.Position = 0;
+                }
+            }
+            return stream;
+        }
     }
 }
