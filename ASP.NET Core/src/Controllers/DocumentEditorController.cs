@@ -627,7 +627,6 @@ namespace SyncfusionDocument.Controllers
             data.RevisedFile.CopyTo(stream1);
             stream1.Position = 0;
             string json = "";
-            WordDocument.MetafileImageParsed -= OnMetafileImageParsed;
 
             using (WDocument originalDocument = new WDocument(stream, WFormatType.Docx))
             {
@@ -655,7 +654,6 @@ namespace SyncfusionDocument.Controllers
             if (data.OriginalFilePath == null || data.RevisedFilePath == null)
                 return null;
             string json = "";
-            WordDocument.MetafileImageParsed -= OnMetafileImageParsed;
             using (WDocument originalDocument = new WDocument(GetDocFromURL(data.OriginalFilePath).Result, WFormatType.Docx))
             {
                 using (WDocument revisedDocument = new WDocument(GetDocFromURL(data.RevisedFilePath).Result, WFormatType.Docx))
