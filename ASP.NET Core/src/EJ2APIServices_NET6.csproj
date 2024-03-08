@@ -37,8 +37,8 @@
     <PackageReference Include="Syncfusion.EJ2.WordEditor.AspNet.Core" Version="*" />
 	<PackageReference Include="Syncfusion.EJ2.SpellChecker.AspNet.Core" Version="*" />
 	<PackageReference Include="System.Drawing.Common" Version="4.*" />	
-	<PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.9.2" />
-  <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.*" />
+	<PackageReference Include="Syncfusion.Licensing" Version="*" />
+	<PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.*" />
   </ItemGroup>
 
 </Project>
