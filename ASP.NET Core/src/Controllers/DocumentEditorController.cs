@@ -616,7 +616,7 @@ namespace SyncfusionDocument.Controllers
         [HttpPost]
         [EnableCors("AllowAllOrigins")]
         [Route("Compare")]
-        public string CompareFiles([FromBody] CompareParameter data)
+        public string CompareDocuments([FromBody] CompareParameter data)
         {
             if (data.OriginalFile == null || data.RevisedFile == null)
                 return null;
@@ -649,7 +649,7 @@ namespace SyncfusionDocument.Controllers
         [HttpPost]
         [EnableCors("AllowAllOrigins")]
         [Route("CompareUrlFiles")]
-        public string CompareUrlFiles([FromBody] CompareUrlParameter data)
+        public string CompareDocumentsFromUrl([FromBody] CompareUrlParameter data)
         {
             if (data.OriginalFilePath == null || data.RevisedFilePath == null)
                 return null;
