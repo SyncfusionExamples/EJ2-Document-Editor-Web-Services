@@ -612,26 +612,27 @@ namespace SyncfusionDocument.Controllers
             stream.Dispose();
             return document;
         }
+        
         [AcceptVerbs("Post")]
         [HttpPost]
         [EnableCors("AllowAllOrigins")]
-        [Route("Compare")]
+        [Route("CompareDocuments")]
         public string CompareDocuments([FromBody] CompareParameter data)
         {
             if (data.OriginalFile == null || data.RevisedFile == null)
                 return null;
-            Stream stream = new MemoryStream();
-            data.OriginalFile.CopyTo(stream);
-            stream.Position = 0;
-            Stream stream1 = new MemoryStream();
-            data.RevisedFile.CopyTo(stream1);
-            stream1.Position = 0;
+            Stream originalDocumentStream = new MemoryStream();
+            data.OriginalFile.CopyTo(originalDocumentStream);
+            originalDocumentStream.Position = 0;
+            Stream revisedDocumentStream = new MemoryStream();
+            data.RevisedFile.CopyTo(revisedDocumentStream);
+            revisedDocumentStream.Position = 0;
             string json = "";
 
-            using (WDocument originalDocument = new WDocument(stream, WFormatType.Docx))
+            using (WDocument originalDocument = new WDocument(originalDocumentStream, WFormatType.Docx))
             {
                 //Load the revised document.
-                using (WDocument revisedDocument = new WDocument(stream1, WFormatType.Docx))
+                using (WDocument revisedDocument = new WDocument(revisedDocumentStream, WFormatType.Docx))
                 {
                     // Compare the original and revised Word documents.
                     originalDocument.Compare(revisedDocument);
@@ -648,7 +649,7 @@ namespace SyncfusionDocument.Controllers
         [AcceptVerbs("Post")]
         [HttpPost]
         [EnableCors("AllowAllOrigins")]
-        [Route("CompareUrlFiles")]
+        [Route("CompareDocumentsFromUrl")]
         public string CompareDocumentsFromUrl([FromBody] CompareUrlParameter data)
         {
             if (data.OriginalFilePath == null || data.RevisedFilePath == null)
@@ -701,6 +702,5 @@ namespace SyncfusionDocument.Controllers
             }
             return stream;
         }
-
     }
 }
