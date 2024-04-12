@@ -152,7 +152,7 @@ public class WordEditorController {
             stream.write(data, 0, data.length);
             try {
 				stream.flush();
-			} catch (IOException e1) {				
+			} catch (IOException e1) {	 			
 			}
             try	
             {
