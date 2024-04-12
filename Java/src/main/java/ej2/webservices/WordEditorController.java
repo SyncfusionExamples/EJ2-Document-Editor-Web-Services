@@ -133,50 +133,46 @@ public class WordEditorController {
 	@PostMapping("/api/wordeditor/MailMerge")
 	public String MailMerge(@RequestBody ExportData exportData)
         {
-		    final String[] fieldNames = {
-                "ShipName", "OrderID", "Discount", "ShipAddress", "ShipCity", 
-                "OrderDate", "ShipCountry", "ProductName", "Quantity", "CustomerID", 
-                "UnitPrice", "Subtotal", "Freight", "Total", "ShipPostalCode", 
-                "ShippedDate", "RequiredDate", "ExtendedPrice"
-            };
-            final String[] fieldValues = {
-                "Nancy Davolio", "10248", "0.2", "507 - 20th Ave. E.Apt. 2A", "Seattle", 
-                "7/4/1996", "USA", "Chai", "10", "VINET", 
-                "14", "168.00", "32.38", "200.00", "98122", 
-                "7/16/1996", "8/1/1996", "168.00"
-            };		          
-			String[] parts = exportData.getDocumentData().split(",");
-            byte[] data = Base64.getDecoder().decode(parts[1]);
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            ByteArrayOutputStream newStream = new ByteArrayOutputStream();;
-            stream.write(data, 0, data.length);
-            try {
-				stream.flush();
-			} catch (IOException e1) {	 			
-			}
-            try	
-            {
-            	ByteArrayInputStream inStream = new ByteArrayInputStream(data);
-                WordDocument document = new WordDocument(inStream, com.syncfusion.docio.FormatType.Docx);
-                document.getMailMerge().setRemoveEmptyGroup(true);
-                document.getMailMerge().setRemoveEmptyParagraphs(true);
-                document.getMailMerge().setClearFields(true);
-                document.getMailMerge().execute(fieldNames, fieldValues);     
-                document.save(newStream, com.syncfusion.docio.FormatType.Docx);
-                document.close();
-            }
-            catch (Exception ex)
-            { }
-            byte[] dataOne = newStream.toByteArray();	
-            System.out.println(dataOne);
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(dataOne);
-            System.out.println(inputStream);
-            String sfdtText = "";
-            try {
-				sfdtText = WordProcessorHelper.load(inputStream, com.syncfusion.ej2.wordprocessor.FormatType.Docx);
-			} catch (Exception e) {				
-			}
-            return sfdtText;
+		final String[] fieldNames = {
+			"ShipName", "OrderID", "Discount", "ShipAddress", "ShipCity", 
+			"OrderDate", "ShipCountry", "ProductName", "Quantity", "CustomerID", 
+			"UnitPrice", "Subtotal", "Freight", "Total", "ShipPostalCode", 
+			"ShippedDate", "RequiredDate", "ExtendedPrice"
+		};		    
+		final String[] fieldValues = {
+			"Nancy Davolio", "10248", "0.2", "507 - 20th Ave. E.Apt. 2A", "Seattle", 
+			"7/4/1996", "USA", "Chai", "10", "VINET", 
+			"14", "168.00", "32.38", "200.00", "98122", 
+			"7/16/1996", "8/1/1996", "168.00"
+		};  
+		String[] documentParts = exportData.getDocumentData().split(",");
+		byte[] documentData = Base64.getDecoder().decode(documentParts[1]);
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		ByteArrayOutputStream newOutputStream = new ByteArrayOutputStream();;
+		outputStream.write(documentData, 0, documentData.length);
+		try {
+			outputStream.flush();
+		} catch (IOException e1) {				
+		}
+		try {
+			ByteArrayInputStream inputStream = new ByteArrayInputStream(documentData);
+			WordDocument document = new WordDocument(inputStream, com.syncfusion.docio.FormatType.Docx);
+			document.getMailMerge().setRemoveEmptyGroup(true);
+			document.getMailMerge().setRemoveEmptyParagraphs(true);
+			document.getMailMerge().setClearFields(true);
+			document.getMailMerge().execute(fieldNames, fieldValues);     
+			document.save(newOutputStream, com.syncfusion.docio.FormatType.Docx);
+			document.close();
+		} catch (Exception ex) { 			
+		}
+		byte[] processedData = newOutputStream.toByteArray();   
+		ByteArrayInputStream processedInputStream = new ByteArrayInputStream(processedData);
+		String sfdtText = "";
+		try {
+			sfdtText = WordProcessorHelper.load(processedInputStream, com.syncfusion.ej2.wordprocessor.FormatType.Docx);
+		} catch (Exception e) { 			
+		}
+		return sfdtText;
         }
 	
 	// Converts Metafile to raster image.
