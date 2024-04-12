@@ -139,26 +139,20 @@ public class WordEditorController {
                 "UnitPrice", "Subtotal", "Freight", "Total", "ShipPostalCode", 
                 "ShippedDate", "RequiredDate", "ExtendedPrice"
             };
-
             final String[] fieldValues = {
                 "Nancy Davolio", "10248", "0.2", "507 - 20th Ave. E.Apt. 2A", "Seattle", 
                 "7/4/1996", "USA", "Chai", "10", "VINET", 
                 "14", "168.00", "32.38", "200.00", "98122", 
                 "7/16/1996", "8/1/1996", "168.00"
-            };
-            MailMerge.performMailMerge();
-//            String[][] fieldValues = MailMerge.getCustomerDataArray();
+            };		          
 			String[] parts = exportData.getDocumentData().split(",");
             byte[] data = Base64.getDecoder().decode(parts[1]);
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             ByteArrayOutputStream newStream = new ByteArrayOutputStream();;
             stream.write(data, 0, data.length);
-//            stream.flush();
             try {
 				stream.flush();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			} catch (IOException e1) {				
 			}
             try	
             {
@@ -167,12 +161,9 @@ public class WordEditorController {
                 document.getMailMerge().setRemoveEmptyGroup(true);
                 document.getMailMerge().setRemoveEmptyParagraphs(true);
                 document.getMailMerge().setClearFields(true);
-//                String[] fieldNames = new String[] { "FullName" };
-//                String[] fieldValues = new String[] { "Nancy Davolio" };           
-//                String[] fieldNames = MailMerge.getFieldNamesArray();
-//                String[] fieldValues = MailMerge.getFieldValuesArray();
-                document.getMailMerge().execute(fieldNames , fieldValues);         
+                document.getMailMerge().execute(fieldNames, fieldValues);     
                 document.save(newStream, com.syncfusion.docio.FormatType.Docx);
+                document.close();
             }
             catch (Exception ex)
             { }
@@ -183,8 +174,7 @@ public class WordEditorController {
             String sfdtText = "";
             try {
 				sfdtText = WordProcessorHelper.load(inputStream, com.syncfusion.ej2.wordprocessor.FormatType.Docx);
-			} catch (Exception e) {
-				e.printStackTrace();
+			} catch (Exception e) {				
 			}
             return sfdtText;
         }
