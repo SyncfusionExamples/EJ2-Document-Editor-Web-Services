@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -16,7 +17,9 @@ import javax.imageio.spi.IIORegistry;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 import org.springframework.core.io.ByteArrayResource;
@@ -125,6 +128,66 @@ public class WordEditorController {
 			return "{\"sections\":[{\"blocks\":[{\"inlines\":[{\"text\":" + e.getMessage() + "}]}]}]}";
 		}
 	}
+	
+	@CrossOrigin(origins = "*", allowedHeaders = "*")
+	@PostMapping("/api/wordeditor/MailMerge")
+	public String MailMerge(@RequestBody ExportData exportData)
+        {
+		    final String[] fieldNames = {
+                "ShipName", "OrderID", "Discount", "ShipAddress", "ShipCity", 
+                "OrderDate", "ShipCountry", "ProductName", "Quantity", "CustomerID", 
+                "UnitPrice", "Subtotal", "Freight", "Total", "ShipPostalCode", 
+                "ShippedDate", "RequiredDate", "ExtendedPrice"
+            };
+
+            final String[] fieldValues = {
+                "Nancy Davolio", "10248", "0.2", "507 - 20th Ave. E.Apt. 2A", "Seattle", 
+                "7/4/1996", "USA", "Chai", "10", "VINET", 
+                "14", "168.00", "32.38", "200.00", "98122", 
+                "7/16/1996", "8/1/1996", "168.00"
+            };
+            MailMerge.performMailMerge();
+//            String[][] fieldValues = MailMerge.getCustomerDataArray();
+			String[] parts = exportData.getDocumentData().split(",");
+            byte[] data = Base64.getDecoder().decode(parts[1]);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            ByteArrayOutputStream newStream = new ByteArrayOutputStream();;
+            stream.write(data, 0, data.length);
+//            stream.flush();
+            try {
+				stream.flush();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+            try	
+            {
+            	ByteArrayInputStream inStream = new ByteArrayInputStream(data);
+                WordDocument document = new WordDocument(inStream, com.syncfusion.docio.FormatType.Docx);
+                document.getMailMerge().setRemoveEmptyGroup(true);
+                document.getMailMerge().setRemoveEmptyParagraphs(true);
+                document.getMailMerge().setClearFields(true);
+//                String[] fieldNames = new String[] { "FullName" };
+//                String[] fieldValues = new String[] { "Nancy Davolio" };           
+//                String[] fieldNames = MailMerge.getFieldNamesArray();
+//                String[] fieldValues = MailMerge.getFieldValuesArray();
+                document.getMailMerge().execute(fieldNames , fieldValues);         
+                document.save(newStream, com.syncfusion.docio.FormatType.Docx);
+            }
+            catch (Exception ex)
+            { }
+            byte[] dataOne = newStream.toByteArray();	
+            System.out.println(dataOne);
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(dataOne);
+            System.out.println(inputStream);
+            String sfdtText = "";
+            try {
+				sfdtText = WordProcessorHelper.load(inputStream, com.syncfusion.ej2.wordprocessor.FormatType.Docx);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+            return sfdtText;
+        }
 	
 	// Converts Metafile to raster image.
 	private static void onMetafileImageParsed(Object sender, MetafileImageParsedEventArgs args) throws Exception {
