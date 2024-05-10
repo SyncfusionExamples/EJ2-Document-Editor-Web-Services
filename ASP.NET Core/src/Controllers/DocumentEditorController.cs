@@ -22,10 +22,10 @@ namespace SyncfusionDocument.Controllers
     [Route("api/[controller]")]
     public class DocumentEditorController : Controller
     {
-        private readonly IHostingEnvironment _hostingEnvironment;
+        private readonly IWebHostEnvironment  _hostingEnvironment;
         string path;
 
-        public DocumentEditorController(IHostingEnvironment hostingEnvironment)
+        public DocumentEditorController(IWebHostEnvironment  hostingEnvironment)
         {
             _hostingEnvironment = hostingEnvironment;
             path = Startup.path;
@@ -230,7 +230,9 @@ namespace SyncfusionDocument.Controllers
                 document.Save(stream, Syncfusion.DocIO.FormatType.Docx);
             }
             catch (Exception ex)
-            { }
+            {
+                return ex.Message;
+            }
             string sfdtText = "";
             Syncfusion.EJ2.DocumentEditor.WordDocument document1 = Syncfusion.EJ2.DocumentEditor.WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
             sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(document1);
