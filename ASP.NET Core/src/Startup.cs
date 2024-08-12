@@ -1,8 +1,5 @@
-﻿using System;
-using System.IO;
-using Microsoft.AspNetCore.Mvc;
+﻿using System.IO;
 using Microsoft.AspNetCore.ResponseCompression;
-using Newtonsoft.Json.Serialization;
 using Syncfusion.EJ2.SpellChecker;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Builder;

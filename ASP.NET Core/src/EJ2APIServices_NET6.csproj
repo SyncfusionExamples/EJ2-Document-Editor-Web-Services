@@ -29,8 +29,6 @@
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="7.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.1.0" />
-    <PackageReference Include="Npgsql" Version="4.0.2" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.1.1.1" />
     <PackageReference Include="SkiaSharp" Version="2.88.6" />
     <PackageReference Include="Syncfusion.Compression.Net.Core" Version="*" />
     <PackageReference Include="Syncfusion.OfficeChart.Net.Core" Version="*" />
