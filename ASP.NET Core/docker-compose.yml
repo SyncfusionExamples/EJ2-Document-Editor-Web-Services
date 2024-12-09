@@ -1,0 +1,10 @@
+services:
+  syncfusion:
+      image: syncfusion
+      build:
+        context: ./
+        dockerfile: ./Dockerfile
+      ports:
+        - "5001:5000"
+      environment:
+        - SYNCFUSION_LICENSE_KEY="LICENSE_KEY"

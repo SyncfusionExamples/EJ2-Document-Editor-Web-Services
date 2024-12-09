@@ -14,6 +14,7 @@ namespace EJ2APIServices
     public class Startup
     {
         internal static string path;
+        readonly string CorsPolicy = "AllowAllOrigins";
 
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
@@ -52,7 +53,7 @@ namespace EJ2APIServices
         }
 
         public IConfiguration Configuration { get; }
-        readonly string MyAllowSpecificOrigins = "MyPolicy";
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -65,22 +66,24 @@ namespace EJ2APIServices
 
             services.AddCors(options =>
             {
-                options.AddPolicy(MyAllowSpecificOrigins,
-                builder =>
-                {
-                    builder.AllowAnyOrigin()
-                      .AllowAnyMethod()
-                      .AllowAnyHeader();
-                });
+                options.AddPolicy(CorsPolicy,
+                    builder =>
+                    {
+                        builder
+                            .WithOrigins("http://localhost:5173", "http://127.0.0.1:5173")
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                            .AllowCredentials();
+                    });
             });
-            services.Configure<GzipCompressionProviderOptions>(options => options.Level = System.IO.Compression.CompressionLevel.Optimal);
+
+            services.Configure<GzipCompressionProviderOptions>(options => 
+                options.Level = System.IO.Compression.CompressionLevel.Optimal);
             services.AddResponseCompression();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            //Register Syncfusion license
             string licenseKey = string.Empty;
             Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(licenseKey);
 
@@ -92,14 +95,16 @@ namespace EJ2APIServices
             {
                 app.UseHsts();
             }
-            app.UseHttpsRedirection();
+
+            // Important : UseCors doit être placé entre UseRouting et UseEndpoints
             app.UseRouting();
+            app.UseCors(CorsPolicy);
             app.UseAuthorization();
-            app.UseCors(MyAllowSpecificOrigins);
             app.UseResponseCompression();
+            
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers().RequireCors("MyPolicy");
+                endpoints.MapControllers().RequireCors(CorsPolicy);
             });
         }
     }

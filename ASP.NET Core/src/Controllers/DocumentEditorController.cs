@@ -18,6 +18,7 @@ using BitMiracle.LibTiff.Classic;
 namespace SyncfusionDocument.Controllers
 {
     [Route("api/[controller]")]
+    [EnableCors("AllowAllOrigins")]
     public class DocumentEditorController : Controller
     {
         private readonly IWebHostEnvironment  _hostingEnvironment;
@@ -32,28 +33,67 @@ namespace SyncfusionDocument.Controllers
         [AcceptVerbs("Post")]
         [HttpPost]
         [EnableCors("AllowAllOrigins")]
-        [Route("Import")]
-        public string Import(IFormCollection data)
+        [Route("LoadString")]
+        public string LoadString([FromBody]InputParameter data)
         {
-            if (data.Files.Count == 0)
-                return null;
-            Stream stream = new MemoryStream();
-            IFormFile file = data.Files[0];
-            int index = file.FileName.LastIndexOf('.');
-            string type = index > -1 && index < file.FileName.Length - 1 ?
-                file.FileName.Substring(index) : ".docx";
-            file.CopyTo(stream);
-            stream.Position = 0;
-
-            //Hooks MetafileImageParsed event.
-            WordDocument.MetafileImageParsed += OnMetafileImageParsed;
-            WordDocument document = WordDocument.Load(stream, GetFormatType(type.ToLower()));
-            //Unhooks MetafileImageParsed event.
-            WordDocument.MetafileImageParsed -= OnMetafileImageParsed;
-
+            Syncfusion.EJ2.DocumentEditor.WordDocument document = Syncfusion.EJ2.DocumentEditor.WordDocument.LoadString(data.content, FormatType.Html);
             string json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
             document.Dispose();
             return json;
+        }
+
+        public class InputParameter
+        {
+            public string content { get; set; }
+        }
+
+        [AcceptVerbs("Post")]
+        [HttpPost]
+        [EnableCors("AllowAllOrigins")]
+        [Route("Import")]
+        public string Import(IFormCollection data)
+        {
+            try 
+            {
+                if (data.Files.Count == 0)
+                    return null;
+                    
+                using (var stream = new MemoryStream())
+                {
+                    IFormFile file = data.Files[0];
+                    int index = file.FileName.LastIndexOf('.');
+                    string type = index > -1 && index < file.FileName.Length - 1 ?
+                        file.FileName.Substring(index) : ".docx";
+                        
+                    file.CopyTo(stream);
+                    stream.Position = 0;
+
+                    // Log file info for debugging
+                    Console.WriteLine($"File name: {file.FileName}");
+                    Console.WriteLine($"File length: {stream.Length}");
+                    Console.WriteLine($"File type: {type}");
+
+                    WordDocument.MetafileImageParsed += OnMetafileImageParsed;
+                    WordDocument document = null;
+                    
+                    try 
+                    {
+                        document = WordDocument.Load(stream, GetFormatType(type.ToLower()));
+                        string json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
+                        return json;
+                    }
+                    finally 
+                    {
+                        WordDocument.MetafileImageParsed -= OnMetafileImageParsed;
+                        document?.Dispose();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error processing document: {ex}");
+                throw;
+            }
         }
 
         //Converts Metafile to raster image.
