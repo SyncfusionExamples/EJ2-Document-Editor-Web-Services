@@ -7,4 +7,4 @@ services:
       ports:
         - "5001:5000"
       environment:
-        - SYNCFUSION_LICENSE_KEY="LICENSE_KEY"
+        - SYNCFUSION_LICENSE_KEY=${SYNCFUSION_LICENSE_KEY}
