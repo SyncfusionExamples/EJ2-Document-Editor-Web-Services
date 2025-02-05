@@ -21,6 +21,8 @@ Document editor performs spell check by processing hunspell dictionary files, So
 
 ### Steps to configure spell checker
 
+* Add the [`Syncfusion.EJ2.SpellChecker.AspNet.Mvc5`](<https://www.nuget.org/packages/Syncfusion.EJ2.SpellChecker.AspNet.Mvc5/>) Nuget in your project 
+
 * In the application App_Data folder, include the dictionary, .aff dictionary files and JSON file. 
 
 ![](appData.PNG)
