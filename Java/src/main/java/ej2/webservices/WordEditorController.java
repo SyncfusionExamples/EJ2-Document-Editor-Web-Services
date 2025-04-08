@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -16,7 +17,9 @@ import javax.imageio.spi.IIORegistry;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 import org.springframework.core.io.ByteArrayResource;
@@ -125,6 +128,52 @@ public class WordEditorController {
 			return "{\"sections\":[{\"blocks\":[{\"inlines\":[{\"text\":" + e.getMessage() + "}]}]}]}";
 		}
 	}
+	
+	@CrossOrigin(origins = "*", allowedHeaders = "*")
+	@PostMapping("/api/wordeditor/MailMerge")
+	public String MailMerge(@RequestBody ExportData exportData)
+        {
+		final String[] fieldNames = {
+			"ShipName", "OrderID", "Discount", "ShipAddress", "ShipCity", 
+			"OrderDate", "ShipCountry", "ProductName", "Quantity", "CustomerID", 
+			"UnitPrice", "Subtotal", "Freight", "Total", "ShipPostalCode", 
+			"ShippedDate", "RequiredDate", "ExtendedPrice"
+		};		    
+		final String[] fieldValues = {
+			"Nancy Davolio", "10248", "0.2", "507 - 20th Ave. E.Apt. 2A", "Seattle", 
+			"7/4/1996", "USA", "Chai", "10", "VINET", 
+			"14", "168.00", "32.38", "200.00", "98122", 
+			"7/16/1996", "8/1/1996", "168.00"
+		};  
+		String[] documentParts = exportData.getDocumentData().split(",");
+		byte[] documentData = Base64.getDecoder().decode(documentParts[1]);
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		ByteArrayOutputStream newOutputStream = new ByteArrayOutputStream();;
+		outputStream.write(documentData, 0, documentData.length);
+		try {
+			outputStream.flush();
+		} catch (IOException e1) {				
+		}
+		try {
+			ByteArrayInputStream inputStream = new ByteArrayInputStream(documentData);
+			WordDocument document = new WordDocument(inputStream, com.syncfusion.docio.FormatType.Docx);
+			document.getMailMerge().setRemoveEmptyGroup(true);
+			document.getMailMerge().setRemoveEmptyParagraphs(true);
+			document.getMailMerge().setClearFields(true);
+			document.getMailMerge().execute(fieldNames, fieldValues);     
+			document.save(newOutputStream, com.syncfusion.docio.FormatType.Docx);
+			document.close();
+		} catch (Exception ex) { 			
+		}
+		byte[] processedData = newOutputStream.toByteArray();   
+		ByteArrayInputStream processedInputStream = new ByteArrayInputStream(processedData);
+		String sfdtText = "";
+		try {
+			sfdtText = WordProcessorHelper.load(processedInputStream, com.syncfusion.ej2.wordprocessor.FormatType.Docx);
+		} catch (Exception e) { 			
+		}
+		return sfdtText;
+        }
 	
 	// Converts Metafile to raster image.
 	private static void onMetafileImageParsed(Object sender, MetafileImageParsedEventArgs args) throws Exception {
