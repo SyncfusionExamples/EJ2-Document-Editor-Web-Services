@@ -60,7 +60,7 @@ JSON file should contains the values in the following format.
 
 * For handling personal dictionary, place empty .dic file (ex. customDict.dic file) in the App_Data folder.
 
-* Refer the added files in the spell checker service call as well where we will pass the file information
+* Refer the added files in the spell checker service call as well where we will pass the file information.
  ![](codeFile.png)
  
 ### How it works
