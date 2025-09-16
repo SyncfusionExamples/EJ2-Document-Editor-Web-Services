@@ -11,7 +11,7 @@ sourceCompatibility = '1.8'
 repositories {
 	mavenCentral()
 	maven  {
-		//Syncfusion maven repository to download the artifacts.
+		//Syncfusion maven repository to download the .
 		url "https://jars.syncfusion.com/repository/maven-public/"
 	}
 }
