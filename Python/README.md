@@ -18,3 +18,7 @@ You can make use of this service in order to paste system clipboard data by pres
 ## ExportSfdt
 
 You can export the SFDT string Doc, DOCX, RTF, Txt, WordML, HTML formats by using this API in server side.
+
+## RestrictEditing
+
+You can make use of this service in order to encrypt/decrypt protected content. 
