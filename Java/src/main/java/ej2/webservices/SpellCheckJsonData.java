@@ -22,9 +22,6 @@ public class SpellCheckJsonData
     @JsonProperty("IgnoreUppercase")
     boolean ignoreUppercase;
 
-    @JsonProperty("UserName")
-    String userName;
-
     public int getLanguageID() { return languageID; }
     public void setLanguageID(int languageID) { this.languageID = languageID; }
 
@@ -43,6 +40,4 @@ public class SpellCheckJsonData
     public boolean isIgnoreUppercase() { return ignoreUppercase; }
     public void setIgnoreUppercase(boolean ignoreUppercase) { this.ignoreUppercase = ignoreUppercase; }
 
-    public String getUserName() { return userName; }
-    public void setUserName(String userName) { this.userName = userName; }
 }

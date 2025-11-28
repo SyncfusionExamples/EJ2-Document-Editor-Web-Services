@@ -188,7 +188,6 @@ public class WordEditorController {
 	    options.setCheckSpelling(data.isCheckSpelling());
 	    options.setAddWord(data.isAddWord());
 	    options.setIgnoreUppercase(data.isIgnoreUppercase());
-	    options.setUserName(data.getUserName());
 	    return options;
 	}
 
