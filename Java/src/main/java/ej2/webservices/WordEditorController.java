@@ -180,12 +180,25 @@ public class WordEditorController {
         return assembly.getManifestResourceStream("ImageNotFound.jpg");
     }
 	
+	private static SpellCheckOptions mapToOptions(SpellCheckJsonData data) throws Exception {
+	    SpellCheckOptions options = new SpellCheckOptions();
+	    options.setLanguageId(data.getLanguageID());
+	    options.setText(data.getTexttoCheck());
+	    options.setEnableSuggestions(data.isCheckSuggestion());
+	    options.setCheckSpelling(data.isCheckSpelling());
+	    options.setAddWord(data.isAddWord());
+	    options.setIgnoreUppercase(data.isIgnoreUppercase());
+	    return options;
+	}
+
+	
 	@CrossOrigin(origins = "*", allowedHeaders = "*")
 	@PostMapping("/api/wordeditor/SpellCheck")
 	public String spellCheck(@RequestBody SpellCheckJsonData spellChecker) throws Exception {
 		try {
 			   SpellChecker spellCheck = new SpellChecker();
-               String data = spellCheck.getSuggestions(spellChecker.languageID, spellChecker.texttoCheck, spellChecker.checkSpelling, spellChecker.checkSuggestion, spellChecker.addWord);
+			   SpellCheckOptions spellCheckOptions = mapToOptions(spellChecker);
+			   String data = spellCheck.getSuggestions(spellCheckOptions);
               return data;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -198,7 +211,8 @@ public class WordEditorController {
 	public String spellCheckByPage(@RequestBody SpellCheckJsonData spellChecker) throws Exception {
 		try {
 			   SpellChecker spellCheck = new SpellChecker();
-               String data = spellCheck.checkSpelling(spellChecker.languageID, spellChecker.texttoCheck);
+			   SpellCheckOptions spellCheckOptions = mapToOptions(spellChecker);
+			   String data = spellCheck.checkSpelling(spellCheckOptions);
               return data;
 		} catch (Exception e) {
 			e.printStackTrace();
