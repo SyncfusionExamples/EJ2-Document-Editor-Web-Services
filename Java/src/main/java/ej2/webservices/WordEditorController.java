@@ -210,9 +210,9 @@ public class WordEditorController {
 	@CrossOrigin(origins = "*", allowedHeaders = "*")
 	@PostMapping("/api/wordeditor/RestrictEditing")
 	public String[] restrictEditing(@RequestBody CustomRestrictParameter param) throws Exception {
-		if (param.passwordBase64 == "" && param.passwordBase64 == null)
+		if (param.passwordBase64 == "" || param.passwordBase64 == null)
 			return null;
-		return WordProcessorHelper.computeHash(param.passwordBase64, param.saltBase64, param.spinCount);
+		return WordProcessorHelper.computeHash(param.passwordBase64, param.saltBase64, param.spinCount, param.algorithmSid);
 	}
 
 	@CrossOrigin(origins = "*", allowedHeaders = "*")

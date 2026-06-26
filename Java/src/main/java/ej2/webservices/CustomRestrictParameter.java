@@ -4,6 +4,7 @@ public class CustomRestrictParameter {
 	public String passwordBase64;
 	public String saltBase64;
 	public int spinCount;
+	public String algorithmSid;
 
 	public String getPasswordBase64() {
 		return passwordBase64;
@@ -17,6 +18,10 @@ public class CustomRestrictParameter {
 		return spinCount;
 	}
 
+	public String getAlgorithmSid() {
+		return algorithmSid;
+	}
+
 	public void setPasswordBase64(String value) {
 		passwordBase64= value;
 	}
@@ -27,5 +32,9 @@ public class CustomRestrictParameter {
 
 	public void setSpinCount(int value) {
 		spinCount= value;
+	}
+
+	public void setAlgorithmSid(String value) {
+		algorithmSid= value;
 	}
 }
