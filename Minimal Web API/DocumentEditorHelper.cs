@@ -141,9 +141,9 @@ namespace DocumentEditorCore
         /// <returns>Hash information</returns>
         public string[]? RestrictEditing(CustomRestrictParameter param)
         {
-            if (param.passwordBase64 == "" && param.passwordBase64 == null)
+            if (param.passwordBase64 == "" || param.passwordBase64 == null)
                 return null;
-            return Syncfusion.EJ2.DocumentEditor.WordDocument.ComputeHash(param.passwordBase64, param.saltBase64, param.spinCount);
+            return Syncfusion.EJ2.DocumentEditor.WordDocument.ComputeHash(param.passwordBase64, param.saltBase64, param.spinCount, param.algorithmSid);
         }
 
         /// <summary>

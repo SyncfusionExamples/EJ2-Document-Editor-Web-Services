@@ -57,11 +57,11 @@ namespace DocumentEditorLibrary
             return "success";
         }
 
-        public string[] RestrictEditing(string passwordBase64, string saltBase64, int spinCount)
+        public string[] RestrictEditing(string passwordBase64, string saltBase64, int spinCount, string algorithmSid)
         {
-            if (passwordBase64 == "" && passwordBase64 == null)
+            if (passwordBase64 == "" || passwordBase64 == null)
                 return null;
-            return WordDocument.ComputeHash(passwordBase64, saltBase64, spinCount);
+            return WordDocument.ComputeHash(passwordBase64, saltBase64, spinCount, algorithmSid);
         }
 
         internal static FormatType GetFormatType(string format)

@@ -69,9 +69,9 @@ namespace EJ2DocumentEditorWebServices.Controllers
         [Route("RestrictEditing")]
         public string[] RestrictEditing([FromBody] CustomRestrictParameter param)
         {
-            if (param.passwordBase64 == "" && param.passwordBase64 == null)
+            if (param.passwordBase64 == "" || param.passwordBase64 == null)
                 return null;
-            return Syncfusion.EJ2.DocumentEditor.WordDocument.ComputeHash(param.passwordBase64, param.saltBase64, param.spinCount);
+            return Syncfusion.EJ2.DocumentEditor.WordDocument.ComputeHash(param.passwordBase64, param.saltBase64, param.spinCount, param.algorithmSid);
         }
 
         [HttpPost]
@@ -261,6 +261,7 @@ namespace EJ2DocumentEditorWebServices.Controllers
         public string passwordBase64 { get; set; }
         public string saltBase64 { get; set; }
         public int spinCount { get; set; }
+        public string algorithmSid { get; set; }
     }
 
 }
