@@ -1,19 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http;
+using System.Text;
 using System.IO;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Syncfusion.EJ2.DocumentEditor;
+using Syncfusion.DocIORenderer;
 using WDocument = Syncfusion.DocIO.DLS.WordDocument;
 using WFormatType = Syncfusion.DocIO.FormatType;
 using Syncfusion.EJ2.SpellChecker;
 using EJ2APIServices;
 using SkiaSharp;
 using BitMiracle.LibTiff.Classic;
+using Syncfusion.Pdf;
 
 namespace SyncfusionDocument.Controllers
 {
@@ -21,12 +25,41 @@ namespace SyncfusionDocument.Controllers
     public class DocumentEditorController : Controller
     {
         private readonly IWebHostEnvironment  _hostingEnvironment;
-        string path;
+        private readonly string path;
+
+        // Security Constants
+        private static readonly string[] ALLOWED_EXTENSIONS = { ".docx", ".doc", ".rtf", ".txt", ".xml", ".html", ".dotx", ".docm", ".dotm" };
+
 
         public DocumentEditorController(IWebHostEnvironment  hostingEnvironment)
         {
             _hostingEnvironment = hostingEnvironment;
-            path = Startup.path;
+            path = Program.path;
+        }
+
+         /// <summary>
+        /// Validates file name for path traversal and special characters
+        /// </summary>
+        private bool IsValidFileName(string fileName)
+        {
+            if (string.IsNullOrEmpty(fileName))
+                return false;
+
+            // Check for path traversal attempts
+            if (fileName.Contains("..") || fileName.Contains("/") || fileName.Contains("\\"))
+                return false;
+
+            // Check for invalid filename characters
+            return !Path.GetInvalidFileNameChars().Any(c => fileName.Contains(c));
+        }
+
+        /// <summary>
+        /// Validates file extension against whitelist
+        /// </summary>
+        private bool IsAllowedExtension(string fileName)
+        {
+            string ext = Path.GetExtension(fileName).ToLower();
+            return ALLOWED_EXTENSIONS.Contains(ext);
         }
 
         [AcceptVerbs("Post")]
@@ -37,23 +70,45 @@ namespace SyncfusionDocument.Controllers
         {
             if (data.Files.Count == 0)
                 return null;
-            Stream stream = new MemoryStream();
+
             IFormFile file = data.Files[0];
+
+            // Validate file extension
+            if (!IsAllowedExtension(file.FileName))
+            {
+                throw new ArgumentException($"File type not allowed. Allowed types: {string.Join(", ", ALLOWED_EXTENSIONS)}");
+            }
+
+            // Validate filename
+            if (!IsValidFileName(file.FileName))
+            {
+                throw new ArgumentException("Invalid filename.");
+            }
+
+            Stream stream = new MemoryStream();
             int index = file.FileName.LastIndexOf('.');
             string type = index > -1 && index < file.FileName.Length - 1 ?
                 file.FileName.Substring(index) : ".docx";
-            file.CopyTo(stream);
-            stream.Position = 0;
+            
+            try
+            {
+                file.CopyTo(stream);
+                stream.Position = 0;
 
-            //Hooks MetafileImageParsed event.
-            WordDocument.MetafileImageParsed += OnMetafileImageParsed;
-            WordDocument document = WordDocument.Load(stream, GetFormatType(type.ToLower()));
-            //Unhooks MetafileImageParsed event.
-            WordDocument.MetafileImageParsed -= OnMetafileImageParsed;
-
-            string json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
-            document.Dispose();
-            return json;
+                //Hooks MetafileImageParsed event.
+                WordDocument.MetafileImageParsed += OnMetafileImageParsed;
+                WordDocument document = WordDocument.Load(stream, GetFormatType(type.ToLower()));
+                //Unhooks MetafileImageParsed event.
+                WordDocument.MetafileImageParsed -= OnMetafileImageParsed;
+                string json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
+                document.Dispose();
+                stream?.Dispose();
+                return json;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Error Loading document: " + ex.Message, ex);
+            }
         }
 
         //Converts Metafile to raster image.
@@ -157,6 +212,19 @@ namespace SyncfusionDocument.Controllers
             return execAssembly.GetManifestResourceStream(fileName);
         }
 
+        private static SpellCheckOptions MapToOptions(SpellCheckJsonData data)
+        {
+            return new SpellCheckOptions
+            {
+                LanguageId = data.LanguageID,
+                Text = data.TexttoCheck,
+                EnableSuggestions = data.CheckSuggestion,
+                CheckSpelling = data.CheckSpelling,
+                AddWord = data.AddWord,
+                IgnoreUppercase = data.IgnoreUppercase
+            };
+        }
+
         [AcceptVerbs("Post")]
         [HttpPost]
         [EnableCors("AllowAllOrigins")]
@@ -166,13 +234,20 @@ namespace SyncfusionDocument.Controllers
             try
             {
                 SpellChecker spellCheck = new SpellChecker();
-                spellCheck.GetSuggestions(spellChecker.LanguageID, spellChecker.TexttoCheck, spellChecker.CheckSpelling, spellChecker.CheckSuggestion, spellChecker.AddWord);
+                SpellCheckOptions spellCheckOptions = MapToOptions(spellChecker);
+                spellCheck.GetSuggestions(spellCheckOptions);
                 return Newtonsoft.Json.JsonConvert.SerializeObject(spellCheck);
             }
             catch
             {
                 return "{\"SpellCollection\":[],\"HasSpellingError\":false,\"Suggestions\":null}";
             }
+        }
+        // GET api/values
+        [HttpGet]
+        public IEnumerable<string> Get()
+        {
+            return new string[] { "value1", "value2" };
         }
 
         [AcceptVerbs("Post")]
@@ -184,7 +259,8 @@ namespace SyncfusionDocument.Controllers
             try
             {
                 SpellChecker spellCheck = new SpellChecker();
-                spellCheck.CheckSpelling(spellChecker.LanguageID, spellChecker.TexttoCheck);
+                SpellCheckOptions spellCheckOptions = MapToOptions(spellChecker);
+                spellCheck.CheckSpelling(spellCheckOptions);
                 return Newtonsoft.Json.JsonConvert.SerializeObject(spellCheck);
             }
             catch
@@ -200,11 +276,13 @@ namespace SyncfusionDocument.Controllers
             public bool CheckSpelling { get; set; }
             public bool CheckSuggestion { get; set; }
             public bool AddWord { get; set; }
+            public bool IgnoreUppercase { get; set; }
 
         }
-        public class UploadDocument
+        public class CustomParameter
         {
-            public string DocumentName { get; set; }
+            public string content { get; set; }
+            public string type { get; set; }
         }
 
 
@@ -214,28 +292,42 @@ namespace SyncfusionDocument.Controllers
         [Route("MailMerge")]
         public string MailMerge([FromBody] ExportData exportData)
         {
-            Byte[] data = Convert.FromBase64String(exportData.documentData.Split(',')[1]);
-            MemoryStream stream = new MemoryStream();
-            stream.Write(data, 0, data.Length);
-            stream.Position = 0;
+            byte[] data;
+            // Input validation
+            if (exportData == null || string.IsNullOrEmpty(exportData.documentData))
+            {
+                throw new ArgumentException("Document data cannot be null or empty.");
+            }
+
             try
             {
-                Syncfusion.DocIO.DLS.WordDocument document = new Syncfusion.DocIO.DLS.WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
-                document.MailMerge.RemoveEmptyGroup = true;
-                document.MailMerge.RemoveEmptyParagraphs = true;
-                document.MailMerge.ClearFields = true;
-                document.MailMerge.Execute(CustomerDataModel.GetAllRecords());
-                document.Save(stream, Syncfusion.DocIO.FormatType.Docx);
+                string cleanBase64 = exportData.documentData.Contains(',') ? exportData.documentData.Split(',')[1] : exportData.documentData;
+                data = Convert.FromBase64String(cleanBase64);
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    stream.Write(data, 0, data.Length);
+                    stream.Position = 0;
+
+                    using (Syncfusion.DocIO.DLS.WordDocument document = new Syncfusion.DocIO.DLS.WordDocument(stream, Syncfusion.DocIO.FormatType.Docx))
+                    {
+                        document.MailMerge.RemoveEmptyGroup = true;
+                        document.MailMerge.RemoveEmptyParagraphs = true;
+                        document.MailMerge.ClearFields = true;
+                        document.MailMerge.Execute(CustomerDataModel.GetAllRecords());
+                        document.Save(stream, Syncfusion.DocIO.FormatType.Docx);
+                    }
+
+                    stream.Position = 0;
+                    Syncfusion.EJ2.DocumentEditor.WordDocument wordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
+                    string sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(wordDocument);
+                    wordDocument?.Dispose();
+                    return sfdtText;
+                }
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                throw new InvalidOperationException("Error processing mail merge: " + ex.Message, ex);
             }
-            string sfdtText = "";
-            Syncfusion.EJ2.DocumentEditor.WordDocument document1 = Syncfusion.EJ2.DocumentEditor.WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
-            sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(document1);
-            document1.Dispose();
-            return sfdtText;
         }
         public class CustomerDataModel
         {
@@ -305,20 +397,11 @@ namespace SyncfusionDocument.Controllers
             public string documentData { get; set; }
         }
 
-
-
-
-        public class CustomParameter
-        {
-            public string content { get; set; }
-            public string type { get; set; }
-        }
-
         [AcceptVerbs("Post")]
         [HttpPost]
         [EnableCors("AllowAllOrigins")]
         [Route("SystemClipboard")]
-        public string SystemClipboard([FromBody]CustomParameter param)
+        public string SystemClipboard([FromBody] CustomParameter param)
         {
             if (param.content != null && param.content != "")
             {
@@ -346,16 +429,21 @@ namespace SyncfusionDocument.Controllers
             public string passwordBase64 { get; set; }
             public string saltBase64 { get; set; }
             public int spinCount { get; set; }
+            public string algorithmSid { get; set; }
+        }
+        public class UploadDocument
+        {
+            public string DocumentName { get; set; }
         }
         [AcceptVerbs("Post")]
         [HttpPost]
         [EnableCors("AllowAllOrigins")]
         [Route("RestrictEditing")]
-        public string[] RestrictEditing([FromBody]CustomRestrictParameter param)
+        public string[] RestrictEditing([FromBody] CustomRestrictParameter param)
         {
-            if (param.passwordBase64 == "" && param.passwordBase64 == null)
+            if (param.passwordBase64 == "" || param.passwordBase64 == null)
                 return null;
-            return WordDocument.ComputeHash(param.passwordBase64, param.saltBase64, param.spinCount);
+            return WordDocument.ComputeHash(param.passwordBase64, param.saltBase64, param.spinCount, param.algorithmSid);
         }
 
 
@@ -371,16 +459,43 @@ namespace SyncfusionDocument.Controllers
             WordDocument document = WordDocument.Load(stream, FormatType.Docx);
             string json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
             document.Dispose();
+            stream.Dispose();
             return json;
         }
 
-        [AcceptVerbs("Post")]
         [HttpPost]
         [EnableCors("AllowAllOrigins")]
         [Route("LoadDocument")]
         public string LoadDocument([FromForm] UploadDocument uploadDocument)
         {
-            string documentPath = Path.Combine(path, uploadDocument.DocumentName);
+            if (uploadDocument == null || string.IsNullOrEmpty(uploadDocument.DocumentName))
+            {
+                throw new ArgumentException("DocumentName cannot be null or empty.");
+            }
+
+            // FIXED: Sanitize the document name, not the base path
+            string sanitizedFileName = Path.GetFileName(uploadDocument.DocumentName);
+            
+            if (!IsValidFileName(sanitizedFileName))
+            {
+                throw new ArgumentException("Invalid document filename.");
+            }
+            // Validate file extension
+            if (!IsAllowedExtension(sanitizedFileName))
+            {
+                throw new ArgumentException($"File type not allowed. Allowed types: {string.Join(", ", ALLOWED_EXTENSIONS)}");
+            }
+
+            string documentPath = Path.Combine(path, sanitizedFileName);
+            
+            // Ensure the resolved path is still within the allowed directory
+            string fullPath = Path.GetFullPath(documentPath);
+            string allowedPath = Path.GetFullPath(path);
+            if (!fullPath.StartsWith(allowedPath, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new UnauthorizedAccessException("Access denied: Path is outside allowed directory.");
+            }
+
             Stream stream = null;
             if (System.IO.File.Exists(documentPath))
             {
@@ -398,11 +513,26 @@ namespace SyncfusionDocument.Controllers
                         stream.Position = 0;
                 }
             }
-            WordDocument document = WordDocument.Load(stream, FormatType.Docx);
-            string json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
-            document.Dispose();
-            return json;
+            try
+            {
+                if (stream == null)
+                {
+                    throw new FileNotFoundException("Document not found.");
+                }
+                using (stream)
+                {
+                    WordDocument document = WordDocument.Load(stream, FormatType.Docx);
+                    string json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
+                    document.Dispose();
+                    return json;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Error loading document: " + ex.Message, ex);
+            }
         }
+
         async Task<MemoryStream> GetDocumentFromURL(string url)
         {
             var client = new HttpClient(); ;
@@ -463,14 +593,16 @@ namespace SyncfusionDocument.Controllers
                     return WFormatType.Doc;
                 case ".rtf":
                     return WFormatType.Rtf;
-                case ".html":
-                    return WFormatType.Html;
                 case ".txt":
                     return WFormatType.Txt;
                 case ".xml":
                     return WFormatType.WordML;
                 case ".odt":
                     return WFormatType.Odt;
+                case ".html":
+                    return WFormatType.Html;
+                case ".md":
+                    return WFormatType.Markdown;
                 default:
                     throw new NotSupportedException("EJ2 DocumentEditor does not support this file format.");
             }
@@ -488,11 +620,37 @@ namespace SyncfusionDocument.Controllers
             {
                 name = "Document1.doc";
             }
-            WDocument document = WordDocument.Save(data.Content);
-            FileStream fileStream = new FileStream(name, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            document.Save(fileStream, GetWFormatType(format));
-            document.Close();
-            fileStream.Close();
+
+            // Validate filename
+            if (!IsValidFileName(name))
+            {
+                throw new ArgumentException("Invalid filename format.");
+            }
+
+            try
+            {
+                WDocument document = WordDocument.Save(data.Content);
+                string savePath = Path.Combine(path, Path.GetFileName(name));
+                
+                // Ensure path is within allowed directory
+                string fullPath = Path.GetFullPath(savePath);
+                string allowedPath = Path.GetFullPath(path);
+                if (!fullPath.StartsWith(allowedPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new UnauthorizedAccessException("Access denied: Cannot save file outside allowed directory.");
+                }
+
+                using (FileStream fileStream = new FileStream(savePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                {
+                    document.Save(fileStream, GetWFormatType(format));
+                }
+                
+                document.Close();
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Error saving document: " + ex.Message, ex);
+            }
         }
 
         [AcceptVerbs("Post")]
@@ -506,6 +664,11 @@ namespace SyncfusionDocument.Controllers
             if (string.IsNullOrEmpty(name))
             {
                 name = "Document1.doc";
+            }
+            // Validate filename
+            if (!IsValidFileName(name))
+            {
+                throw new ArgumentException("Invalid filename format.");
             }
             WDocument document = WordDocument.Save(data.Content);
             return SaveDocument(document, format, name);
@@ -523,70 +686,174 @@ namespace SyncfusionDocument.Controllers
         {
             public string Content { get; set; }
             public string FileName { get; set; }
+            public string Format { get; set; }
         }
 
+        //[AcceptVerbs("Post")]
+        //[HttpPost]
+        //[EnableCors("AllowAllOrigins")]
+        //[Route("ExportFromBlob")]
+        //public FileStreamResult ExportFromBlob(IFormCollection data)
+        //{
+        //    if (data.Files.Count == 0)
+        //        return null;
+        //    string fileName = this.GetValue(data, "filename");
+        //    string name = fileName;
+        //    int index = name.LastIndexOf('.');
+        //    string format = index > -1 && index < name.Length - 1 ?
+        //        name.Substring(index) : ".doc";
+        //    if (string.IsNullOrEmpty(name))
+        //    {
+        //        name = "Document1";
+        //    }
+        //    Stream stream = new MemoryStream();
+        //    string contentType = "";
+        //    WDocument document = this.GetDocument(data);
+        //    if (format == ".pdf")
+        //    {
+        //        contentType = "application/pdf";
+        //    }
+        //    else
+        //    {
+        //        WFormatType type = GetWFormatType(format);
+        //        switch (type)
+        //        {
+        //            case WFormatType.Rtf:
+        //                contentType = "application/rtf";
+        //                break;
+        //            case WFormatType.WordML:
+        //                contentType = "application/xml";
+        //                break;
+        //            case WFormatType.Html:
+        //                contentType = "application/html";
+        //                break;
+        //            case WFormatType.Markdown:
+        //                contentType = "application/markdown";
+        //                break;
+        //            case WFormatType.Dotx:
+        //                contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.template";
+        //                break;
+        //            case WFormatType.Docx:
+        //                contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        //                break;
+        //            case WFormatType.Doc:
+        //                contentType = "application/msword";
+        //                break;
+        //            case WFormatType.Dot:
+        //                contentType = "application/msword";
+        //                break;
+        //        }
+        //        document.Save(stream, type);
+        //    }
+        //    document.Close();
+        //    stream.Position = 0;
+        //    return new FileStreamResult(stream, contentType)
+        //    {
+        //        FileDownloadName = fileName
+        //    };
+        //}
         [AcceptVerbs("Post")]
         [HttpPost]
         [EnableCors("AllowAllOrigins")]
         [Route("Export")]
-        public FileStreamResult Export(IFormCollection data)
+        public FileStreamResult Export([FromBody] SaveParameter data)
         {
-            if (data.Files.Count == 0)
-                return null;
-            string fileName = this.GetValue(data, "filename");
-            string name = fileName;
-            string format = RetrieveFileType(name);
-            if (string.IsNullOrEmpty(name))
+            string fileName = data.FileName;
+            string format = RetrieveFileType(string.IsNullOrEmpty(data.Format) ? fileName : data.Format);
+            if (string.IsNullOrEmpty(fileName))
             {
-                name = "Document1";
+                fileName = "Document1.docx";
             }
-            WDocument document = this.GetDocument(data);
+            // Validate filename
+            if (!IsValidFileName(fileName))
+            {
+                throw new ArgumentException("Invalid filename format.");
+            }
+
+            WDocument document;
+            if (format.ToLower() == ".pdf")
+            {
+                Stream stream = WordDocument.Save(data.Content, FormatType.Docx);
+                document = new Syncfusion.DocIO.DLS.WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
+            }
+            else
+            {
+                document = WordDocument.Save(data.Content);
+            }
+
             return SaveDocument(document, format, fileName);
         }
 
         private FileStreamResult SaveDocument(WDocument document, string format, string fileName)
         {
+            // Validate filename before saving
+            if (!IsValidFileName(fileName))
+            {
+                throw new ArgumentException("Invalid filename format.");
+            }
+
             Stream stream = new MemoryStream();
             string contentType = "";
-            if (format == ".pdf")
+            try
             {
-                contentType = "application/pdf";
-            }
-            else
-            {
-                WFormatType type = GetWFormatType(format);
-                switch (type)
+                if (format.ToLower() == ".pdf")
                 {
-                    case WFormatType.Rtf:
-                        contentType = "application/rtf";
-                        break;
-                    case WFormatType.WordML:
-                        contentType = "application/xml";
-                        break;
-                    case WFormatType.Html:
-                        contentType = "application/html";
-                        break;
-                    case WFormatType.Dotx:
-                        contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.template";
-                        break;
-                    case WFormatType.Docx:
-                        contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-                        break;
-                    case WFormatType.Doc:
-                        contentType = "application/msword";
-                        break;
-                    case WFormatType.Dot:
-                        contentType = "application/msword";
-                        break;
+                    contentType = "application/pdf";
+                    DocIORenderer render = new DocIORenderer();
+                    PdfDocument pdfDocument = render.ConvertToPDF(document);
+                    stream = new MemoryStream();
+                    pdfDocument.Save(stream);
+                    pdfDocument.Close();
                 }
-                document.Save(stream, type);
+                else
+                {
+                    WFormatType type = GetWFormatType(format);
+                    switch (type)
+                    {
+                        case WFormatType.Rtf:
+                            contentType = "application/rtf";
+                            break;
+                        case WFormatType.WordML:
+                            contentType = "application/xml";
+                            break;
+                        case WFormatType.Html:
+                            contentType = "application/html";
+                            break;
+                        case WFormatType.Dotx:
+                            contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.template";
+                            break;
+                        case WFormatType.Docx:
+                            contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                            break;
+                        case WFormatType.Doc:
+                            contentType = "application/msword";
+                            break;
+                        case WFormatType.Dot:
+                            contentType = "application/msword";
+                            break;
+                        case WFormatType.Odt:
+                            contentType = "application/vnd.oasis.opendocument.text";
+                            break;
+                        case WFormatType.Markdown:
+                            contentType = "text/markdown";
+                            break;
+                    }
+                    document.Save(stream, type);
+                }
+
+                document.Close();
+
+                stream.Position = 0;
+                return new FileStreamResult(stream, contentType)
+                {
+                    FileDownloadName = fileName
+                };
             }
-            document.Close();
-            stream.Position = 0;
-            return new FileStreamResult(stream, contentType)
+            catch (Exception ex)
             {
-                FileDownloadName = fileName
-            };
+                stream?.Dispose();
+                throw new InvalidOperationException("Error saving documents: " + ex.Message, ex);
+            }
         }
 
         private string GetValue(IFormCollection data, string key)
@@ -611,6 +878,129 @@ namespace SyncfusionDocument.Controllers
             WDocument document = new WDocument(stream, WFormatType.Docx);
             stream.Dispose();
             return document;
+        }
+        [AcceptVerbs("Post")]
+        [HttpPost]
+        [EnableCors("AllowAllOrigins")]
+        [Route("CompareDocuments")]
+        public string CompareDocuments([FromForm] CompareParameter data)
+        {
+            if (data.OriginalFile == null || data.RevisedFile == null)
+                return null;
+
+            IFormFile originalFile = data.OriginalFile;
+            IFormFile revisedFile = data.RevisedFile;
+
+            try
+            {
+                using (WDocument revisedDocument = GetWordDocument(revisedFile))
+                {
+                    using (WDocument originalDocument = GetWordDocument(originalFile))
+                    {
+                        originalDocument.Compare(revisedDocument);
+                        //Hooks MetafileImageParsed event.
+                        WordDocument.MetafileImageParsed += OnMetafileImageParsed;
+                        WordDocument document = WordDocument.Load(originalDocument);
+                        //Unhooks MetafileImageParsed event.
+                        WordDocument.MetafileImageParsed -= OnMetafileImageParsed;
+
+                        string json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
+                        document.Dispose();
+                        return json;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Error comparing documents: " + ex.Message, ex);
+            }
+        }
+        private static WDocument GetWordDocument(IFormFile file)
+        {
+            Stream stream = new MemoryStream();
+            int index = file.FileName.LastIndexOf('.');
+            string type = index > -1 && index < file.FileName.Length - 1 ?
+                file.FileName.Substring(index) : ".docx";
+            file.CopyTo(stream);
+            stream.Position = 0;
+
+            WDocument document;
+            if (type == ".sfdt")
+            {
+                using (var reader = new StreamReader(stream))
+                {
+                    string sfdtContent = reader.ReadToEnd();
+                    document = WordDocument.Save(sfdtContent);
+                    var outStream = new MemoryStream();
+                    document.Save(outStream, WFormatType.Docx);
+                    document.Close();
+                    WDocument wordDocument = new WDocument(outStream, WFormatType.Docx);
+                    return wordDocument;
+                }
+            }
+            else
+            {
+                document = new WDocument(stream, GetWFormatType(type));
+                stream.Dispose();
+                return document;
+            }
+        }
+
+        [AcceptVerbs("Post")]
+        [HttpPost]
+        [EnableCors("AllowAllOrigins")]
+        [Route("CompareDocumentsFromUrl")]
+        public string CompareDocumentsFromUrl([FromBody] CompareUrlParameter data)
+        {
+            if (data.OriginalFilePath == null || data.RevisedFilePath == null)
+                return null;
+            string json = "";
+            using (WDocument originalDocument = new WDocument(GetDocFromURL(data.OriginalFilePath).Result, WFormatType.Docx))
+            {
+                using (WDocument revisedDocument = new WDocument(GetDocFromURL(data.RevisedFilePath).Result, WFormatType.Docx))
+                {
+                    originalDocument.Compare(revisedDocument);
+                    WordDocument document = WordDocument.Load(originalDocument);
+                    json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
+                    originalDocument.Dispose();
+                    revisedDocument.Dispose();
+                    document.Dispose();
+                }
+            }
+            return json;
+        }
+        public class CompareUrlParameter
+        {
+            public string OriginalFilePath { get; set; }
+            public string RevisedFilePath { get; set; }
+        }
+        public class CompareParameter
+        {
+            public IFormFile OriginalFile { get; set; }
+            public IFormFile RevisedFile { get; set; }
+        }
+
+        async Task<Stream> GetDocFromURL(string url)
+        {
+            string documentPath = Path.Combine(path, url);
+            Stream stream = null;
+            if (System.IO.File.Exists(documentPath))
+            {
+                byte[] bytes = System.IO.File.ReadAllBytes(documentPath);
+                stream = new MemoryStream(bytes);
+            }
+            else
+            {
+                bool result = Uri.TryCreate(url, UriKind.Absolute, out Uri uriResult)
+                    && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+                if (result)
+                {
+                    stream = GetDocumentFromURL(url).Result;
+                    if (stream != null)
+                        stream.Position = 0;
+                }
+            }
+            return stream;
         }
     }
 }
