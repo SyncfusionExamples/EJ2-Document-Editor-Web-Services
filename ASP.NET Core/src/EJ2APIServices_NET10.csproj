@@ -6,14 +6,42 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Data\**" />
-    <Content Remove="Data\**" />
-    <EmbeddedResource Remove="Data\**" />
-    <None Remove="Data\**" />
+    <None Remove="Data\customDict.dic" />
+    <None Remove="Data\en_US.aff" />
+    <None Remove="Data\en_US.dic" />
+    <None Remove="Data\customDict_es.dic" />
+    <None Remove="Data\es_US.aff" />
+    <None Remove="Data\es_US.dic" />
+    <None Remove="Data\Getting Started.docx" />
   </ItemGroup>
 	
 		
   <ItemGroup>
+    <Content Include="Data\customDict.dic">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\en_US.aff">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\en_US.dic">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Getting Started.docx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\customDict_es.dic">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\es_US.aff">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\es_US.dic">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
@@ -22,21 +50,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.2" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="7.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.1.0" />
-    <PackageReference Include="SkiaSharp" Version="2.88.6" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.0" />
+    <PackageReference Include="SkiaSharp" Version="*" />
     <PackageReference Include="Syncfusion.Compression.Net.Core" Version="*" />
+    <PackageReference Include="Syncfusion.DocIORenderer.Net.Core" Version="*" />
     <PackageReference Include="Syncfusion.OfficeChart.Net.Core" Version="*" />
     <PackageReference Include="Syncfusion.EJ2.WordEditor.AspNet.Core" Version="*" />
     <PackageReference Include="Syncfusion.EJ2.SpellChecker.AspNet.Core" Version="*" />
     <PackageReference Include="System.Drawing.Common" Version="4.*" />
 	<PackageReference Include="Syncfusion.Licensing" Version="*" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.*" />
   </ItemGroup>
 
 </Project>
