@@ -1,20 +1,33 @@
-# Integrated .Net Core Library in python
+# Python backend web service sample for the DOCX Editor
 
-We have created Documenteditor utility with following functionalities:
+This folder contains the tested wrapper files for hosting the DOCX Editor server-side operations from a Python (Flask) web service. See the documentation page [How to Use Python as a Backend Web Service in DOCX Editor](../use-python-as-backend-web-service.md) for the full walkthrough.
 
-* Import
-* ExportSfdt
-* SystemClipboard
-* RestrictEditing
+## Folder structure
 
-## Import
+| File | Purpose |
+|---|---|
+| `.NET Class Library/DocumentEditorLibrary/Documenteditor.cs` | C# wrapper class (`Import`, `Save`, `SystemClipboard`, `RestrictEditing`, `MailMerge`, `CompareDocuments`) |
+| `.NET Class Library/DocumentEditorLibrary/DocumentEditorLibrary.csproj` | Class library project targeting `net10.0` with the required NuGet packages |
+| `app.py` | Flask application hosting all six endpoints in a single file |
 
-You can provide parameter as base64String of file which will convert to SFDT format by using this API. In import.py, we have provided default document as base64String.
+N> Keep the class library inside the `.NET Class Library` subfolder. If the `DocumentEditorLibrary` folder is placed directly next to `app.py`, Python treats it as a local package and the `from DocumentEditorLibrary import Documenteditor` call fails.
 
-## SystemClipboard
+## Build the class library
 
-You can make use of this service in order to paste system clipboard data by preserving the formatting. In parameter, you can provide clipboard content as rtf or html string with type.
+```bash
+cd .NET Class Library/DocumentEditorLibrary
+.NET Class Library build -c Release
+.NET Class Library publish -c Release
+cd ../..
+```
 
-## ExportSfdt
+## Start the Python web service
 
-You can export the SFDT string Doc, DOCX, RTF, Txt, WordML, HTML formats by using this API in server side.
+```bash
+pip install flask flask-cors pythonnet
+python app.py
+```
+
+The service runs at `http://127.0.0.1:5000/`. Configure the DOCX Editor's `serviceUrl` property to this address.
+
+On Linux/macOS, if pythonnet cannot find the .NET runtime, set `PYTHONNET_RUNTIME=coreclr` before starting the service.
