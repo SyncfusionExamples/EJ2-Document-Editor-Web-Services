@@ -6,18 +6,18 @@ This folder contains the tested wrapper files for hosting the DOCX Editor server
 
 | File | Purpose |
 |---|---|
-| `.NET Class Library/DocumentEditorLibrary/Documenteditor.cs` | C# wrapper class (`Import`, `Save`, `SystemClipboard`, `RestrictEditing`, `MailMerge`, `CompareDocuments`) |
+| `dotnet/DocumentEditorLibrary/Documenteditor.cs` | C# wrapper class (`Import`, `Save`, `SystemClipboard`, `RestrictEditing`, `MailMerge`, `CompareDocuments`) |
 | `.NET Class Library/DocumentEditorLibrary/DocumentEditorLibrary.csproj` | Class library project targeting `net10.0` with the required NuGet packages |
 | `app.py` | Flask application hosting all six endpoints in a single file |
 
-N> Keep the class library inside the `.NET Class Library` subfolder. If the `DocumentEditorLibrary` folder is placed directly next to `app.py`, Python treats it as a local package and the `from DocumentEditorLibrary import Documenteditor` call fails.
+N> Keep the class library inside the `dotnet` subfolder. If the `DocumentEditorLibrary` folder is placed directly next to `app.py`, Python treats it as a local package and the `from DocumentEditorLibrary import Documenteditor` call fails.
 
 ## Build the class library
 
 ```bash
-cd .NET Class Library/DocumentEditorLibrary
-.NET Class Library build -c Release
-.NET Class Library publish -c Release
+cd dotnet/DocumentEditorLibrary
+dotnet build -c Release
+dotnet publish -c Release
 cd ../..
 ```
 
