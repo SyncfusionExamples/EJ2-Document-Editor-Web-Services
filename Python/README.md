@@ -1,6 +1,6 @@
 # Python backend web service sample for the DOCX Editor
 
-This folder contains the tested wrapper files for hosting the DOCX Editor server-side operations from a Python (Flask) web service. See the documentation page [How to Use Python as a Backend Web Service in DOCX Editor](../use-python-as-backend-web-service.md) for the full walkthrough.
+This folder contains the tested wrapper files for hosting the DOCX Editor server-side operations from a Python (Flask) web service.
 
 ## Folder structure
 
